@@ -1,42 +1,88 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useState } from 'react'
 import { loadStripe, Stripe } from '@stripe/stripe-js'
-
-const stripePublishableKey = (import.meta as any).env.VITE_STRIPE_PUBLISHABLE_KEY
+import { createCheckoutSession, createPortalSession, getSubscriptionStatus } from '../api/stripe'
 
 interface StripeContextType {
   stripe: Stripe | null
   loading: boolean
+  createCheckoutSession: (priceId: string, userId: string) => Promise<{ error: any; sessionId?: string }>
+  createCustomerPortalSession: (customerId: string) => Promise<{ error: any; url?: string }>
+  getSubscriptionStatus: (customerId: string) => Promise<{ error: any; status?: string }>
 }
 
 const StripeContext = createContext<StripeContextType | undefined>(undefined)
 
-export const useStripe = () => {
+// Get Stripe publishable key
+const stripePublishableKey = (import.meta as any).env.VITE_STRIPE_PUBLISHABLE_KEY
+
+if (!stripePublishableKey) {
+  console.warn('Missing Stripe publishable key. Stripe functionality will be disabled.')
+}
+
+const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null
+
+export const useStripeContext = () => {
   const context = useContext(StripeContext)
   if (context === undefined) {
-    throw new Error('useStripe must be used within a StripeProvider')
+    throw new Error('useStripeContext must be used within a StripeProvider')
   }
   return context
 }
 
 export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [stripe, setStripe] = useState<Stripe | null>(null)
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    if (stripePublishableKey && stripePublishableKey !== 'your_stripe_publishable_key_here') {
-      loadStripe(stripePublishableKey).then((stripeInstance) => {
-        setStripe(stripeInstance)
-        setLoading(false)
-      })
-    } else {
-      console.warn('Stripe publishable key not found - using mock mode')
+  const handleCreateCheckoutSession = async (priceId: string, userId: string) => {
+    if (!stripePublishableKey) {
+      return { error: new Error('Stripe not configured') }
+    }
+
+    setLoading(true)
+    try {
+      const result = await createCheckoutSession({ priceId, userId })
+      return result
+    } catch (error) {
+      return { error }
+    } finally {
       setLoading(false)
     }
-  }, [])
+  }
+
+  const handleCreateCustomerPortalSession = async (customerId: string) => {
+    if (!stripePublishableKey) {
+      return { error: new Error('Stripe not configured') }
+    }
+
+    setLoading(true)
+    try {
+      const result = await createPortalSession({ customerId })
+      return result
+    } catch (error) {
+      return { error }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleGetSubscriptionStatus = async (customerId: string) => {
+    if (!stripePublishableKey) {
+      return { error: new Error('Stripe not configured') }
+    }
+
+    try {
+      const result = await getSubscriptionStatus(customerId)
+      return result
+    } catch (error) {
+      return { error }
+    }
+  }
 
   const value = {
-    stripe,
-    loading
+    stripe: stripePromise,
+    loading,
+    createCheckoutSession: handleCreateCheckoutSession,
+    createCustomerPortalSession: handleCreateCustomerPortalSession,
+    getSubscriptionStatus: handleGetSubscriptionStatus,
   }
 
   return (

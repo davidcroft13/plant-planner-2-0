@@ -29,10 +29,10 @@ const LandingPage: React.FC = () => {
             </nav>
             
             <div className="flex space-x-4">
-              <Link to="/app" className="btn btn-secondary px-4 py-2">
+              <Link to="/login" className="btn btn-secondary px-4 py-2">
                 Log In
               </Link>
-              <Link to="/app" className="btn btn-primary px-4 py-2">
+              <Link to="/signup" className="btn btn-primary px-4 py-2">
                 Sign Up
               </Link>
             </div>

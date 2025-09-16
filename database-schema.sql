@@ -10,7 +10,8 @@ CREATE TABLE users (
   email TEXT UNIQUE NOT NULL,
   name TEXT,
   role TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin')),
-  subscription_status TEXT DEFAULT 'inactive' CHECK (subscription_status IN ('active', 'inactive', 'cancelled')),
+  subscription_status TEXT DEFAULT 'inactive' CHECK (subscription_status IN ('active', 'inactive', 'cancelled', 'trial')),
+  trial_ends_at TIMESTAMP WITH TIME ZONE,
   stripe_customer_id TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
