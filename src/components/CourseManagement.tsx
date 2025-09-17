@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { createClient } from '@supabase/supabase-js'
-import { Plus, Search, Filter, Edit, Trash2, X, Upload } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, X, Upload } from 'lucide-react'
 
 // Get environment variables
 const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Clock, Heart, MoreVertical, Users } from 'lucide-react'
+import { Clock, Heart, Users } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 
 // Get environment variables

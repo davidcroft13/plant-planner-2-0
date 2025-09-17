@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Play, CheckCircle, DollarSign, Camera, BarChart3, Users, Star } from 'lucide-react'
+import { Play, CheckCircle, DollarSign, Camera, BarChart3 } from 'lucide-react'
 import IntercomWidget from '../components/IntercomWidget'
 
 const LandingPage: React.FC = () => {

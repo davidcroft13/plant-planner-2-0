@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Search, Plus, MoreVertical, Heart, Users, Clock, Star } from 'lucide-react'
+import { Search, Plus, Heart, Clock } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 
 // Get environment variables

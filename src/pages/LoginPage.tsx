@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useStripeContext } from '../contexts/StripeContext'
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('')
@@ -12,7 +12,6 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState('')
   
   const { signIn, resetPassword } = useAuth()
-  const { createCheckoutSession } = useStripeContext()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {

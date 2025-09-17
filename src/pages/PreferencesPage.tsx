@@ -19,7 +19,7 @@ interface UserPreferences {
 }
 
 const PreferencesPage: React.FC = () => {
-  const { user, userProfile } = useAuth()
+  const { user } = useAuth()
   const [preferences, setPreferences] = useState<UserPreferences>({
     goals: [],
     allergies: [],
@@ -362,7 +362,7 @@ const PreferencesPage: React.FC = () => {
             </div>
           </div>
 
-      <style jsx>{`
+      <style>{`
         .slider::-webkit-slider-thumb {
           appearance: none;
           height: 20px;

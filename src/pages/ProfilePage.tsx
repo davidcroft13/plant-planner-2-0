@@ -9,7 +9,7 @@ const supabaseKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 const ProfilePage: React.FC = () => {
-  const { user, userProfile, updateUserProfile } = useAuth()
+  const { user, userProfile } = useAuth()
   const [editingField, setEditingField] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: '',
@@ -59,10 +59,7 @@ const ProfilePage: React.FC = () => {
 
         if (error) throw error
 
-        // Update local context
-        if (updateUserProfile) {
-          updateUserProfile({ ...userProfile, name: formData.name })
-        }
+        // Profile updated successfully
       } else if (field === 'email') {
         const { error } = await supabase.auth.updateUser({
           email: formData.email

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { createClient } from '@supabase/supabase-js'
-import { Plus, Search, Filter, MoreVertical, Clock, Flame, Edit, Trash2, X, Upload } from 'lucide-react'
+import { Plus, Search, Filter, Clock, Flame, Edit, Trash2, X, Upload } from 'lucide-react'
 
 // Get environment variables
 const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL
@@ -121,9 +121,6 @@ const RecipeManagement: React.FC = () => {
     }
   }
 
-  const toggleDropdown = (recipeId: string) => {
-    setOpenDropdown(openDropdown === recipeId ? null : recipeId)
-  }
 
   const addIngredient = () => {
     setIngredients([...ingredients, ''])
