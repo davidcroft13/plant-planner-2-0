@@ -26,11 +26,14 @@ const Header: React.FC = () => {
     <header className="bg-white border-b border-gray-200 px-4 py-3">
       <div className="flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">P</span>
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+            <span className="text-white font-bold text-lg">P</span>
           </div>
-          <span className="text-xl font-bold text-gray-900">PlantPlanner</span>
+          <div className="flex flex-col">
+            <span className="text-xl font-bold text-gray-900 leading-tight">Plant Planner</span>
+            <span className="text-xs text-gray-500 -mt-1">Healthy Living Made Simple</span>
+          </div>
         </div>
 
         {/* Right side actions */}
@@ -48,11 +51,16 @@ const Header: React.FC = () => {
           <div className="relative">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="flex items-center space-x-2 text-gray-700 hover:text-gray-900"
+              className="flex items-center space-x-3 text-gray-700 hover:text-gray-900 bg-gray-50 rounded-full px-3 py-2 hover:bg-gray-100 transition-colors"
             >
-              <span className="text-sm font-medium">{userProfile?.name || 'User'}</span>
-              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                <User className="w-4 h-4" />
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-md">
+                <span className="text-white font-semibold text-sm">
+                  {(userProfile?.name || 'U').charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="text-sm font-medium">{userProfile?.name || 'User'}</span>
+                <span className="text-xs text-gray-500">View Profile</span>
               </div>
             </button>
 

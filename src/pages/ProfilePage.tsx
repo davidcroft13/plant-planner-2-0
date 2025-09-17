@@ -1,180 +1,348 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { User, Mail, Lock, Camera, Trash2, Settings, CreditCard, BookOpen, MessageCircle, LogOut } from 'lucide-react'
+import { createClient } from '@supabase/supabase-js'
+import { MoreVertical, Trash2, AlertTriangle } from 'lucide-react'
+
+// Get environment variables
+const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL
+const supabaseKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 const ProfilePage: React.FC = () => {
-  const { user, signOut } = useAuth()
-  const [activeTab, setActiveTab] = useState('profile')
+  const { user, userProfile, updateUserProfile } = useAuth()
+  const [editingField, setEditingField] = useState<string | null>(null)
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  })
+  const [loading, setLoading] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
 
-  const handleSignOut = async () => {
+  useEffect(() => {
+    if (userProfile) {
+      setFormData(prev => ({
+        ...prev,
+        name: userProfile.name || '',
+        email: user?.email || ''
+      }))
+    }
+  }, [userProfile, user])
+
+  const handleEdit = (field: string) => {
+    setEditingField(field)
+  }
+
+  const handleCancel = () => {
+    setEditingField(null)
+    setFormData(prev => ({
+      ...prev,
+      name: userProfile?.name || '',
+      email: user?.email || '',
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    }))
+  }
+
+  const handleSave = async (field: string) => {
+    setLoading(true)
     try {
-      await signOut()
+      if (field === 'name') {
+        const { error } = await supabase
+          .from('users')
+          .update({ name: formData.name })
+          .eq('id', user?.id)
+
+        if (error) throw error
+
+        // Update local context
+        if (updateUserProfile) {
+          updateUserProfile({ ...userProfile, name: formData.name })
+        }
+      } else if (field === 'email') {
+        const { error } = await supabase.auth.updateUser({
+          email: formData.email
+        })
+        if (error) throw error
+      } else if (field === 'password') {
+        if (formData.newPassword !== formData.confirmPassword) {
+          alert('New passwords do not match')
+          return
+        }
+
+        const { error } = await supabase.auth.updateUser({
+          password: formData.newPassword
+        })
+        if (error) throw error
+      }
+
+      setEditingField(null)
+      setFormData(prev => ({
+        ...prev,
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      }))
     } catch (error) {
-      console.error('Error signing out:', error)
+      console.error('Error updating profile:', error)
+      alert('Error updating profile. Please try again.')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const tabs = [
-    { id: 'profile', label: 'Profile', icon: User },
-    { id: 'preferences', label: 'Preferences', icon: Settings },
-    { id: 'billing', label: 'Billing', icon: CreditCard }
-  ]
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== 'DELETE') {
+      alert('Please type DELETE to confirm account deletion')
+      return
+    }
+
+    setLoading(true)
+    try {
+      // Delete user data from users table
+      const { error: userError } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', user?.id)
+
+      if (userError) throw userError
+
+      // Delete user from auth
+      const { error: authError } = await supabase.auth.admin.deleteUser(user?.id || '')
+      if (authError) throw authError
+
+      // Sign out and redirect
+      await supabase.auth.signOut()
+      window.location.href = '/'
+    } catch (error) {
+      console.error('Error deleting account:', error)
+      alert('Error deleting account. Please contact support.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <div className="px-4 py-6">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Manage your account</h1>
-        
-        {/* Tabs */}
-        <div className="flex space-x-1 bg-gray-100 rounded-lg p-1 w-fit">
-          {tabs.map((tab) => {
-            const Icon = tab.icon
-            const isActive = activeTab === tab.id
-            return (
+    <div>
+      {/* Profile Content */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            {/* Photo */}
+            <div className="flex items-center justify-between py-6 border-b border-gray-100">
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <span className="text-white font-semibold text-xl">
+                    {(userProfile?.name || 'U').charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Photo</h3>
+                  <p className="text-sm text-gray-500">Your profile picture</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Name */}
+            <div className="flex items-center justify-between py-6 border-b border-gray-100">
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Name</h3>
+                {editingField === 'name' ? (
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Enter your name"
+                    />
+                    <button
+                      onClick={() => handleSave('name')}
+                      disabled={loading}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={handleCancel}
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-gray-600">{userProfile?.name || 'Not set'}</p>
+                )}
+              </div>
+              {editingField !== 'name' && (
+                <button
+                  onClick={() => handleEdit('name')}
+                  className="p-2 text-gray-400 hover:text-gray-600"
+                >
+                  <MoreVertical className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+
+            {/* Email */}
+            <div className="flex items-center justify-between py-6 border-b border-gray-100">
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Email</h3>
+                {editingField === 'email' ? (
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Enter your email"
+                    />
+                    <button
+                      onClick={() => handleSave('email')}
+                      disabled={loading}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={handleCancel}
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-gray-600">{user?.email || 'Not set'}</p>
+                )}
+              </div>
+              {editingField !== 'email' && (
+                <button
+                  onClick={() => handleEdit('email')}
+                  className="p-2 text-gray-400 hover:text-gray-600"
+                >
+                  <MoreVertical className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+
+            {/* Password */}
+            <div className="flex items-center justify-between py-6 border-b border-gray-100">
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Password</h3>
+                {editingField === 'password' ? (
+                  <div className="space-y-3">
+                    <input
+                      type="password"
+                      value={formData.currentPassword}
+                      onChange={(e) => setFormData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Current password"
+                    />
+                    <input
+                      type="password"
+                      value={formData.newPassword}
+                      onChange={(e) => setFormData(prev => ({ ...prev, newPassword: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="New password"
+                    />
+                    <input
+                      type="password"
+                      value={formData.confirmPassword}
+                      onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Confirm new password"
+                    />
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={() => handleSave('password')}
+                        disabled={loading}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={handleCancel}
+                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-gray-600">••••••••</p>
+                )}
+              </div>
+              {editingField !== 'password' && (
+                <button
+                  onClick={() => handleEdit('password')}
+                  className="p-2 text-gray-400 hover:text-gray-600"
+                >
+                  <MoreVertical className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+
+            {/* Delete Account */}
+            <div className="py-6">
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
+                onClick={() => setShowDeleteModal(true)}
+                className="flex items-center space-x-2 px-4 py-3 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
               >
-                <Icon className="w-4 h-4" />
-                <span>{tab.label}</span>
+                <Trash2 className="w-5 h-5" />
+                <span className="font-medium">I want to remove all my data</span>
               </button>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Profile Tab Content */}
-      {activeTab === 'profile' && (
-        <div className="max-w-2xl">
-          <div className="card p-6">
-            <div className="space-y-6">
-              {/* Photo */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
-                    <User className="w-8 h-8 text-gray-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Photo</h3>
-                    <p className="text-sm text-gray-600">Profile picture</p>
-                  </div>
+            </div>
+          </div>
+      {/* Delete Account Modal */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
                 </div>
-                <button className="p-2 text-gray-400 hover:text-gray-600">
-                  <Camera className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Name */}
-              <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Name</h3>
-                  <p className="text-sm text-gray-600">{user?.name || 'David Croft'}</p>
+                  <h3 className="text-lg font-semibold text-gray-900">Delete Account</h3>
+                  <p className="text-sm text-gray-600">This action cannot be undone</p>
                 </div>
-                <button className="p-2 text-gray-400 hover:text-gray-600">
-                  <Settings className="w-4 h-4" />
-                </button>
               </div>
-
-              {/* Email */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Email</h3>
-                  <p className="text-sm text-gray-600">{user?.email || 'davidcroft15@gmail.com'}</p>
-                </div>
-                <button className="p-2 text-gray-400 hover:text-gray-600">
-                  <Settings className="w-4 h-4" />
+              
+              <p className="text-gray-700 mb-4">
+                This will permanently delete your account and all associated data. 
+                Type <strong>DELETE</strong> to confirm.
+              </p>
+              
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="Type DELETE to confirm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent mb-4"
+              />
+              
+              <div className="flex space-x-3">
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={deleteConfirmText !== 'DELETE' || loading}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Deleting...' : 'Delete Account'}
                 </button>
-              </div>
-
-              {/* Password */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Password</h3>
-                  <p className="text-sm text-gray-600">hidden</p>
-                </div>
-                <button className="p-2 text-gray-400 hover:text-gray-600">
-                  <Settings className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Delete Account Button */}
-              <div className="pt-6 border-t border-gray-200">
-                <button className="flex items-center space-x-2 text-red-600 hover:text-red-700 font-medium">
-                  <Trash2 className="w-4 h-4" />
-                  <span>I want to remove all my data</span>
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false)
+                    setDeleteConfirmText('')
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
                 </button>
               </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Preferences Tab Content */}
-      {activeTab === 'preferences' && (
-        <div className="max-w-2xl">
-          <div className="card p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Preferences</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium text-gray-900">Email Notifications</h3>
-                  <p className="text-sm text-gray-600">Receive updates about new recipes and features</p>
-                </div>
-                <input type="checkbox" className="w-4 h-4 text-primary-600" defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium text-gray-900">Push Notifications</h3>
-                  <p className="text-sm text-gray-600">Get notified about meal plan reminders</p>
-                </div>
-                <input type="checkbox" className="w-4 h-4 text-primary-600" defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium text-gray-900">Dark Mode</h3>
-                  <p className="text-sm text-gray-600">Switch to dark theme</p>
-                </div>
-                <input type="checkbox" className="w-4 h-4 text-primary-600" />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Billing Tab Content */}
-      {activeTab === 'billing' && (
-        <div className="max-w-2xl">
-          <div className="card p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Billing</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div>
-                  <h3 className="font-medium text-gray-900">Current Plan</h3>
-                  <p className="text-sm text-gray-600">Growth Plan - $50/month</p>
-                </div>
-                <button className="btn btn-primary px-4 py-2">
-                  Manage Subscription
-                </button>
-              </div>
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div>
-                  <h3 className="font-medium text-gray-900">Payment Method</h3>
-                  <p className="text-sm text-gray-600">•••• •••• •••• 4242</p>
-                </div>
-                <button className="btn btn-secondary px-4 py-2">
-                  Update
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+        )}
     </div>
   )
 }

@@ -11,7 +11,7 @@ const BottomNavigation: React.FC = () => {
     { path: '/app/courses', icon: BookOpen, label: 'Courses' },
     { path: '/app/plans', icon: Calendar, label: 'Plans' },
     { path: '/app/workouts', icon: Activity, label: 'Move' },
-    { path: '/app/profile', icon: User, label: 'Account' },
+    { path: '/app/account', icon: User, label: 'Account' },
   ]
 
   const isActive = (path: string) => {

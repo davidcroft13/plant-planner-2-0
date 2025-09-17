@@ -14,7 +14,7 @@ import RecipesPage from './pages/RecipesPage'
 import MealPlanPage from './pages/MealPlanPage'
 import CoursesPage from './pages/CoursesPage'
 import WorkoutsPage from './pages/WorkoutsPage'
-import ProfilePage from './pages/ProfilePage'
+import AccountPage from './pages/AccountPage'
 import AdminPortal from './pages/AdminPortal'
 import CreatorPortal from './pages/CreatorPortal'
 
@@ -37,7 +37,7 @@ function App() {
                 <Route path="plans" element={<MealPlanPage />} />
                 <Route path="courses" element={<CoursesPage />} />
                 <Route path="workouts" element={<WorkoutsPage />} />
-                <Route path="profile" element={<ProfilePage />} />
+                <Route path="account" element={<AccountPage />} />
               </Route>
               <Route path="/admin" element={<AdminPortal />} />
               <Route path="/creator" element={<CreatorPortal />} />

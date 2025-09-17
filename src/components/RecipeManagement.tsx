@@ -20,6 +20,7 @@ interface Recipe {
   ingredients?: string[]
   instructions?: string[]
   is_published: boolean
+  is_favorite: boolean
   created_at: string
   updated_at: string
 }
@@ -255,6 +256,20 @@ const RecipeManagement: React.FC = () => {
       fetchRecipes()
     } catch (error) {
       console.error('Error toggling publish status:', error)
+    }
+  }
+
+  const handleToggleFavorite = async (recipe: Recipe) => {
+    try {
+      const newStatus = !recipe.is_favorite
+      const { error } = await supabase
+        .from('recipes')
+        .update({ is_favorite: newStatus })
+        .eq('id', recipe.id)
+      if (error) throw error
+      fetchRecipes()
+    } catch (error) {
+      console.error('Error toggling favorite status:', error)
     }
   }
 
@@ -604,12 +619,24 @@ const RecipeManagement: React.FC = () => {
                 )}
                 
                 {/* Publish Toggle */}
-                <div className="absolute top-3 right-3">
+                <div className="absolute top-3 right-3 flex space-x-2">
+                  <button
+                    onClick={() => handleToggleFavorite(recipe)}
+                    className={`w-12 h-6 rounded-full transition-colors ${
+                      recipe.is_favorite ? 'bg-yellow-500' : 'bg-gray-300'
+                    }`}
+                    title={recipe.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
+                  >
+                    <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${
+                      recipe.is_favorite ? 'translate-x-6' : 'translate-x-0.5'
+                    }`} />
+                  </button>
                   <button
                     onClick={() => handleTogglePublish(recipe)}
                     className={`w-12 h-6 rounded-full transition-colors ${
                       recipe.is_published ? 'bg-green-500' : 'bg-gray-300'
                     }`}
+                    title={recipe.is_published ? 'Unpublish' : 'Publish'}
                   >
                     <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${
                       recipe.is_published ? 'translate-x-6' : 'translate-x-0.5'

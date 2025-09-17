@@ -1,47 +1,65 @@
-import React, { useState } from 'react'
-import { Search, Plus, MoreVertical, Heart, Users } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { Search, Plus, MoreVertical, Heart, Users, Clock, Star } from 'lucide-react'
+import { createClient } from '@supabase/supabase-js'
+
+// Get environment variables
+const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL
+const supabaseKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+interface Course {
+  id: string
+  title: string
+  description: string
+  image_url?: string
+  duration?: number
+  difficulty: string
+  category?: string
+  is_published: boolean
+  created_at: string
+}
 
 const CoursesPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('')
+  const [courses, setCourses] = useState<Course[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Mock data - in real app this would come from Supabase
-  const courses = [
-    {
-      id: 1,
-      title: '7 Day Plyo training',
-      description: 'jump higher and be more explosive with these...',
-      image: '/api/placeholder/300/200',
-      participants: 3
-    },
-    {
-      id: 2,
-      title: 'Isometric Overload - a Beginner to expert Guide',
-      description: 'Isometric Overload - a Beginner to expert Guide',
-      image: '/api/placeholder/300/200',
-      participants: 1
-    },
-    {
-      id: 3,
-      title: 'Javelin Training',
-      description: 'The best course on how to hit 60 M in Men\'s Javelin',
-      image: '/api/placeholder/300/200',
-      participants: 3
-    },
-    {
-      id: 4,
-      title: 'Testing',
-      description: 'Test',
-      image: '/api/placeholder/300/200',
-      participants: 1
-    },
-    {
-      id: 5,
-      title: 'Med Ball Madness',
-      description: 'The only med ball workout you\'ll ever need',
-      image: '/api/placeholder/300/200',
-      participants: 1
+  useEffect(() => {
+    fetchCourses()
+  }, [])
+
+  const fetchCourses = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('is_published', true)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching courses:', error)
+      } else {
+        setCourses(data || [])
+      }
+    } catch (error) {
+      console.error('Error fetching courses:', error)
+    } finally {
+      setLoading(false)
     }
-  ]
+  }
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty.toLowerCase()) {
+      case 'beginner':
+        return 'bg-green-100 text-green-800'
+      case 'intermediate':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'advanced':
+        return 'bg-red-100 text-red-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
 
   return (
     <div className="px-4 py-6">
@@ -70,29 +88,52 @@ const CoursesPage: React.FC = () => {
 
       {/* Course Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {courses.map((course) => (
-          <div key={course.id} className="card card-hover overflow-hidden">
-            <div className="relative">
-              <div className="w-full h-48 bg-gray-200 rounded-t-lg"></div>
-              <button className="absolute top-3 right-3 p-1">
-                <MoreVertical className="w-4 h-4 text-white" />
-              </button>
-            </div>
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{course.title}</h3>
-              <p className="text-gray-600 text-sm mb-4">{course.description}</p>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center text-gray-500 text-sm">
-                  <Users className="w-4 h-4 mr-1" />
-                  <span>{course.participants} Participant{course.participants !== 1 ? 's' : ''}</span>
+        {loading ? (
+          <div className="col-span-full text-center py-8 text-gray-600">Loading courses...</div>
+        ) : courses.length === 0 ? (
+          <div className="col-span-full text-center py-8 text-gray-600">
+            <div className="text-6xl mb-4">📚</div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No courses yet</h3>
+            <p className="text-gray-600">Check back soon for amazing courses!</p>
+          </div>
+        ) : (
+          courses.map((course) => (
+            <div key={course.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
+              <div className="relative">
+                <img 
+                  src={course.image_url || 'https://via.placeholder.com/400x200'} 
+                  alt={course.title}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="absolute top-3 right-3">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getDifficultyColor(course.difficulty)}`}>
+                    {course.difficulty}
+                  </span>
                 </div>
-                <button className="p-1 text-gray-400 hover:text-red-500">
-                  <Heart className="w-4 h-4" />
-                </button>
+                {course.category && (
+                  <div className="absolute top-3 left-3">
+                    <span className="px-3 py-1 bg-white bg-opacity-90 text-gray-800 text-sm font-medium rounded-full">
+                      {course.category}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{course.title}</h3>
+                <p className="text-gray-600 text-sm mb-4 line-clamp-3">{course.description}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center text-gray-500 text-sm">
+                    <Clock className="w-4 h-4 mr-1" />
+                    <span>{course.duration || 0} min</span>
+                  </div>
+                  <button className="p-1 text-gray-400 hover:text-red-500 transition-colors">
+                    <Heart className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   )

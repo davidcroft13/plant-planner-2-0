@@ -178,29 +178,29 @@ const WorkoutsPage: React.FC = () => {
         {/* Workout Detail Modal */}
         {selectedWorkout && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[95vh] overflow-y-auto shadow-2xl">
               <div className="relative">
                 <img 
-                  src={selectedWorkout.image_url || 'https://via.placeholder.com/800x400'} 
+                  src={selectedWorkout.image_url || 'https://via.placeholder.com/800x500'} 
                   alt={selectedWorkout.title}
-                  className="w-full h-64 object-cover rounded-t-lg"
+                  className="w-full h-80 object-cover rounded-t-2xl"
                 />
                 <button
                   onClick={() => setSelectedWorkout(null)}
-                  className="absolute top-4 left-4 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70"
+                  className="absolute top-6 left-6 bg-white bg-opacity-90 text-gray-700 rounded-full p-3 hover:bg-opacity-100 shadow-lg"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
-                <div className="absolute top-4 right-4 flex space-x-2">
-                  <button className="bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="absolute top-6 right-6 flex space-x-3">
+                  <button className="bg-white bg-opacity-90 text-gray-700 rounded-full p-3 hover:bg-opacity-100 shadow-lg">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                     </svg>
                   </button>
-                  <button className="bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70">
-                    <Heart className="w-5 h-5" />
+                  <button className="bg-white bg-opacity-90 text-gray-700 rounded-full p-3 hover:bg-opacity-100 shadow-lg">
+                    <Heart className="w-6 h-6" />
                   </button>
                 </div>
                 {selectedWorkout.video_url && (
@@ -210,43 +210,44 @@ const WorkoutsPage: React.FC = () => {
                 )}
               </div>
               
-              <div className="p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">{selectedWorkout.title}</h2>
-                
-                <div className="flex items-center space-x-4 mb-4 text-sm text-gray-600">
-                  <span className="flex items-center">
-                    <Clock className="w-4 h-4 mr-1" />
-                    {selectedWorkout.duration || 0} min
-                  </span>
-                  <span className={`px-2 py-1 rounded text-xs ${getDifficultyColor(selectedWorkout.difficulty)}`}>
-                    {selectedWorkout.difficulty}
-                  </span>
-                  <span className="px-2 py-1 rounded bg-green-100 text-green-800 text-xs">
-                    {selectedWorkout.category}
-                  </span>
+              <div className="p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-3xl font-bold text-gray-900">{selectedWorkout.title}</h2>
+                  <div className="flex items-center space-x-3 text-sm text-gray-500">
+                    <span className="flex items-center bg-gray-100 px-4 py-2 rounded-full">
+                      <Clock className="w-4 h-4 mr-2" />
+                      {selectedWorkout.duration || 0} min
+                    </span>
+                    <span className={`px-4 py-2 rounded-full font-medium ${getDifficultyColor(selectedWorkout.difficulty)}`}>
+                      {selectedWorkout.difficulty}
+                    </span>
+                    <span className="px-4 py-2 bg-green-100 text-green-800 rounded-full font-medium">
+                      {selectedWorkout.category}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Description</h3>
-                  <p className="text-gray-700">{selectedWorkout.description}</p>
+                <div className="mb-8">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">Description</h3>
+                  <p className="text-gray-700 text-lg leading-relaxed">{selectedWorkout.description}</p>
                 </div>
 
                 {selectedWorkout.exercises && selectedWorkout.exercises.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Exercises</h3>
-                    <div className="space-y-4">
+                  <div className="mb-8">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-6">Exercises</h3>
+                    <div className="space-y-6">
                       {selectedWorkout.exercises.map((exercise, index) => (
-                        <div key={index} className="border border-gray-200 rounded-lg p-4">
-                          <div className="flex justify-between items-start mb-2">
-                            <h4 className="font-medium text-gray-900">{exercise.name}</h4>
-                            <div className="flex space-x-2 text-sm text-gray-600">
-                              {exercise.sets && <span>{exercise.sets} sets</span>}
-                              {exercise.reps && <span>{exercise.reps} reps</span>}
-                              {exercise.duration && <span>{exercise.duration}s</span>}
+                        <div key={index} className="bg-gray-50 rounded-xl p-6">
+                          <div className="flex justify-between items-start mb-4">
+                            <h4 className="text-lg font-semibold text-gray-900">{exercise.name}</h4>
+                            <div className="flex space-x-3 text-sm text-gray-600">
+                              {exercise.sets && <span className="bg-white px-3 py-1 rounded-full">{exercise.sets} sets</span>}
+                              {exercise.reps && <span className="bg-white px-3 py-1 rounded-full">{exercise.reps} reps</span>}
+                              {exercise.duration && <span className="bg-white px-3 py-1 rounded-full">{exercise.duration}s</span>}
                             </div>
                           </div>
                           {exercise.notes && (
-                            <p className="text-sm text-gray-600">{exercise.notes}</p>
+                            <p className="text-gray-600 mb-4">{exercise.notes}</p>
                           )}
                         </div>
                       ))}
@@ -254,15 +255,12 @@ const WorkoutsPage: React.FC = () => {
                   </div>
                 )}
 
-                <div className="flex justify-end space-x-4">
+                <div className="flex justify-end pt-6 border-t border-gray-200">
                   <button
                     onClick={() => setSelectedWorkout(null)}
-                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                    className="px-8 py-3 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors font-medium"
                   >
                     Close
-                  </button>
-                  <button className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                    Start Workout
                   </button>
                 </div>
               </div>

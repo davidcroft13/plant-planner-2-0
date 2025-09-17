@@ -142,66 +142,61 @@ const RecipesPage: React.FC = () => {
       {/* Recipe Detail Modal */}
       {selectedRecipe && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[95vh] overflow-y-auto shadow-2xl">
             <div className="relative">
               <img 
-                src={selectedRecipe.image_url || 'https://via.placeholder.com/800x400'} 
+                src={selectedRecipe.image_url || 'https://via.placeholder.com/800x500'} 
                 alt={selectedRecipe.title}
-                className="w-full h-64 object-cover rounded-t-lg"
+                className="w-full h-80 object-cover rounded-t-2xl"
               />
               <button
                 onClick={() => setSelectedRecipe(null)}
-                className="absolute top-4 left-4 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70"
+                className="absolute top-6 left-6 bg-white bg-opacity-90 text-gray-700 rounded-full p-3 hover:bg-opacity-100 shadow-lg"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              <div className="absolute top-4 right-4 flex space-x-2">
-                <button className="bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="absolute top-6 right-6 flex space-x-3">
+                <button className="bg-white bg-opacity-90 text-gray-700 rounded-full p-3 hover:bg-opacity-100 shadow-lg">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                   </svg>
                 </button>
-                <button className="bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70">
-                  <Heart className="w-5 h-5" />
-                </button>
-                <button className="bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70">
-                  <MoreVertical className="w-5 h-5" />
+                <button className="bg-white bg-opacity-90 text-gray-700 rounded-full p-3 hover:bg-opacity-100 shadow-lg">
+                  <Heart className="w-6 h-6" />
                 </button>
               </div>
             </div>
             
-            <div className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedRecipe.title}</h2>
-              
-              <div className="flex items-center space-x-4 mb-4 text-sm text-gray-600">
-                <span className="flex items-center">
-                  <Clock className="w-4 h-4 mr-1" />
-                  {(selectedRecipe.prep_time || 0) + (selectedRecipe.cook_time || 0)} min
-                </span>
-                <span className="flex items-center">
-                  <Users className="w-4 h-4 mr-1" />
-                  {selectedRecipe.servings} servings
-                </span>
-                <span className="px-2 py-1 rounded bg-green-100 text-green-800 text-xs">
-                  {selectedRecipe.category}
-                </span>
+            <div className="p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-3xl font-bold text-gray-900">{selectedRecipe.title}</h2>
+                <div className="flex items-center space-x-3 text-sm text-gray-500">
+                  <span className="flex items-center bg-gray-100 px-4 py-2 rounded-full">
+                    <Clock className="w-4 h-4 mr-2" />
+                    {(selectedRecipe.prep_time || 0) + (selectedRecipe.cook_time || 0)} min
+                  </span>
+                  <span className="flex items-center bg-gray-100 px-4 py-2 rounded-full">
+                    <Users className="w-4 h-4 mr-2" />
+                    {selectedRecipe.servings} servings
+                  </span>
+                </div>
               </div>
 
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Description</h3>
-                <p className="text-gray-700">{selectedRecipe.description}</p>
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">Description</h3>
+                <p className="text-gray-700 text-lg leading-relaxed">{selectedRecipe.description}</p>
               </div>
 
               {selectedRecipe.ingredients && selectedRecipe.ingredients.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Ingredients</h3>
-                  <div className="space-y-2">
+                <div className="mb-8">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-6">Ingredients</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {selectedRecipe.ingredients.map((ingredient, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-gray-700">{ingredient}</span>
+                      <div key={index} className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                        <div className="w-3 h-3 bg-green-500 rounded-full flex-shrink-0"></div>
+                        <span className="text-gray-700 font-medium">{ingredient}</span>
                       </div>
                     ))}
                   </div>
@@ -209,30 +204,29 @@ const RecipesPage: React.FC = () => {
               )}
 
               {selectedRecipe.instructions && selectedRecipe.instructions.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Instructions</h3>
-                  <div className="space-y-4">
+                <div className="mb-8">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-6">Instructions</h3>
+                  <div className="space-y-6">
                     {selectedRecipe.instructions.map((instruction, index) => (
-                      <div key={index} className="flex space-x-3">
-                        <div className="flex-shrink-0 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                      <div key={index} className="flex space-x-4">
+                        <div className="flex-shrink-0 w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center text-lg font-bold">
                           {index + 1}
                         </div>
-                        <p className="text-gray-700">{instruction}</p>
+                        <div className="flex-1 p-4 bg-gray-50 rounded-lg">
+                          <p className="text-gray-700 leading-relaxed">{instruction}</p>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              <div className="flex justify-end space-x-4">
+              <div className="flex justify-end pt-6 border-t border-gray-200">
                 <button
                   onClick={() => setSelectedRecipe(null)}
-                  className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  className="px-8 py-3 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors font-medium"
                 >
                   Close
-                </button>
-                <button className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                  Save Recipe
                 </button>
               </div>
             </div>

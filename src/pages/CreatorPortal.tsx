@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { createClient } from '@supabase/supabase-js'
 import RecipeManagement from '../components/RecipeManagement'
 import WorkoutManagement from '../components/WorkoutManagement'
+import CourseManagement from '../components/CourseManagement'
 import PostManagement from '../components/PostManagement'
 
 // Get environment variables
@@ -307,17 +308,7 @@ const CreatorPortal: React.FC = () => {
 
                {activeTab === 'workouts' && <WorkoutManagement />}
 
-          {activeTab === 'courses' && (
-            <div>
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Courses</h2>
-                <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-                  + Create Course
-                </button>
-              </div>
-              <p className="text-gray-600">Course management interface coming soon...</p>
-            </div>
-          )}
+               {activeTab === 'courses' && <CourseManagement />}
 
           {activeTab === 'posts' && <PostManagement />}
         </div>
