@@ -20,10 +20,14 @@ export interface CreatePortalSessionResponse {
   error?: string
 }
 
-// Real API functions that call your backend
+// Real API functions that call your Vercel serverless functions
 export const createCheckoutSession = async (data: CreateCheckoutSessionRequest): Promise<CreateCheckoutSessionResponse> => {
   try {
-    const response = await fetch('http://localhost:3001/api/stripe/create-checkout-session', {
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://your-app-name.vercel.app' 
+      : 'http://localhost:3000'
+    
+    const response = await fetch(`${baseUrl}/api/stripe/create-checkout-session`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -41,14 +45,18 @@ export const createCheckoutSession = async (data: CreateCheckoutSessionRequest):
   } catch (error) {
     console.error('Stripe API error:', error)
     return {
-      error: 'Backend server not running. Please start the backend server with: cd backend && npm run dev'
+      error: 'Failed to create checkout session'
     }
   }
 }
 
 export const createPortalSession = async (data: CreatePortalSessionRequest): Promise<CreatePortalSessionResponse> => {
   try {
-    const response = await fetch('http://localhost:3001/api/stripe/create-portal-session', {
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://your-app-name.vercel.app' 
+      : 'http://localhost:3000'
+    
+    const response = await fetch(`${baseUrl}/api/stripe/create-customer-portal-session`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
