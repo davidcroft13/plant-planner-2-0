@@ -3,11 +3,11 @@ import { loadStripe, Stripe } from '@stripe/stripe-js'
 import { createCheckoutSession, createPortalSession, getSubscriptionStatus } from '../api/stripe'
 
 interface StripeContextType {
-  stripe: Stripe | null
+  stripe: Promise<Stripe | null> | null
   loading: boolean
-  createCheckoutSession: (priceId: string, userId: string) => Promise<{ error: any; sessionId?: string }>
-  createCustomerPortalSession: (customerId: string) => Promise<{ error: any; url?: string }>
-  getSubscriptionStatus: (customerId: string) => Promise<{ error: any; status?: string }>
+  createCheckoutSession: (priceId: string, userId: string) => Promise<{ error?: any; sessionId?: string }>
+  createCustomerPortalSession: (customerId: string) => Promise<{ error?: any; url?: string }>
+  getSubscriptionStatus: (customerId: string) => Promise<{ error?: any; status?: string }>
 }
 
 const StripeContext = createContext<StripeContextType | undefined>(undefined)

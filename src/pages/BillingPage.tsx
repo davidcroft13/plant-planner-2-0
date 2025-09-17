@@ -17,10 +17,11 @@ interface BillingInfo {
   billing_cycle: 'monthly' | 'yearly'
   next_billing_date: string
   cancel_at_period_end: boolean
+  stripe_customer_id?: string
 }
 
 const BillingPage: React.FC = () => {
-  const { user, userProfile } = useAuth()
+  const { user } = useAuth()
   const { createCheckoutSession, createCustomerPortalSession } = useStripeContext()
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null)
   const [loading, setLoading] = useState(false)
@@ -75,9 +76,14 @@ const BillingPage: React.FC = () => {
   }
 
   const handleManageBilling = async () => {
+    if (!billingInfo?.stripe_customer_id) {
+      alert('No billing information available. Please contact support.')
+      return
+    }
+    
     setLoading(true)
     try {
-      const { error } = await createCustomerPortalSession()
+      const { error } = await createCustomerPortalSession(billingInfo.stripe_customer_id)
       if (error) {
         alert('Error opening billing portal. Please try again.')
         return
