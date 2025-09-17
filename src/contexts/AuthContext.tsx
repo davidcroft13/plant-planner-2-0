@@ -69,6 +69,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const hasActiveSubscription = userProfile?.subscription_status === 'active' || 
     (userProfile?.subscription_status === 'trial' && !isTrialExpired)
 
+  // Debug admin status
+  const isAdmin = userProfile?.role === 'admin'
+  console.log('AuthContext - userProfile:', userProfile)
+  console.log('AuthContext - userProfile.role:', userProfile?.role)
+  console.log('AuthContext - isAdmin:', isAdmin)
+
   // Debug logging
   useEffect(() => {
     if (userProfile) {

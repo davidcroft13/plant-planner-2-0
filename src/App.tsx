@@ -16,6 +16,7 @@ import CoursesPage from './pages/CoursesPage'
 import WorkoutsPage from './pages/WorkoutsPage'
 import ProfilePage from './pages/ProfilePage'
 import AdminPortal from './pages/AdminPortal'
+import CreatorPortal from './pages/CreatorPortal'
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
                 <Route path="profile" element={<ProfilePage />} />
               </Route>
               <Route path="/admin" element={<AdminPortal />} />
+              <Route path="/creator" element={<CreatorPortal />} />
             </Routes>
             <Toaster position="top-right" />
           </div>

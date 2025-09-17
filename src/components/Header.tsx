@@ -8,6 +8,11 @@ const Header: React.FC = () => {
   const [showDropdown, setShowDropdown] = useState(false)
   const navigate = useNavigate()
 
+  // Debug logging
+  console.log('Header - user:', user)
+  console.log('Header - userProfile:', userProfile)
+  console.log('Header - isAdmin:', isAdmin)
+
   const handleSignOut = async () => {
     try {
       await signOut()
@@ -95,7 +100,10 @@ const Header: React.FC = () => {
                   </button>
                   
                   {isAdmin && (
-                    <button className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-primary-600 hover:bg-gray-50">
+                    <button 
+                      onClick={() => navigate('/creator')}
+                      className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-primary-600 hover:bg-gray-50"
+                    >
                       <ExternalLink className="w-4 h-4" />
                       <span>Open Creator Portal</span>
                     </button>
