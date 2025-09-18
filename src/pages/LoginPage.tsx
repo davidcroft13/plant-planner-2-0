@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Eye, EyeOff } from 'lucide-react'
 
@@ -9,9 +9,19 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
+  const [searchParams] = useSearchParams()
   
   const { signIn, resetPassword } = useAuth()
   const navigate = useNavigate()
+
+  // Check for email verification success
+  useEffect(() => {
+    const verified = searchParams.get('verified')
+    if (verified === 'true') {
+      setSuccessMessage('Email verified successfully! You can now log in.')
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -79,6 +89,11 @@ const LoginPage: React.FC = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {successMessage && (
+              <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md text-sm">
+                {successMessage}
+              </div>
+            )}
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
                 {error}

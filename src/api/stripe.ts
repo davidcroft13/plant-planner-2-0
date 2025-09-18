@@ -24,7 +24,7 @@ export interface CreatePortalSessionResponse {
 export const createCheckoutSession = async (data: CreateCheckoutSessionRequest): Promise<CreateCheckoutSessionResponse> => {
   try {
     const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://your-app-name.vercel.app' 
+      ? (import.meta as any).env.VITE_FRONTEND_URL || 'https://plantplanner-2-0.vercel.app'
       : 'http://localhost:3000'
     
     const response = await fetch(`${baseUrl}/api/stripe/create-checkout-session`, {
@@ -53,7 +53,7 @@ export const createCheckoutSession = async (data: CreateCheckoutSessionRequest):
 export const createPortalSession = async (data: CreatePortalSessionRequest): Promise<CreatePortalSessionResponse> => {
   try {
     const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://your-app-name.vercel.app' 
+      ? (import.meta as any).env.VITE_FRONTEND_URL || 'https://plantplanner-2-0.vercel.app'
       : 'http://localhost:3000'
     
     const response = await fetch(`${baseUrl}/api/stripe/create-customer-portal-session`, {

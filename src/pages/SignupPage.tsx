@@ -81,6 +81,8 @@ const SignupPage: React.FC = () => {
       } else {
         console.log('SignUp successful, moving to step 2')
         setStep(2) // Go to email verification step
+        // Clear any previous errors
+        setError('')
       }
     } catch (err) {
       console.error('SignUp exception:', err)
