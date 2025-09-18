@@ -40,8 +40,17 @@ export const createCheckoutSession = async (data: CreateCheckoutSessionRequest):
     })
 
     console.log('Stripe API response status:', response.status)
-    const result = await response.json()
-    console.log('Stripe API response:', result)
+    
+    let result
+    try {
+      result = await response.json()
+      console.log('Stripe API response:', result)
+    } catch (jsonError) {
+      console.error('JSON parsing error:', jsonError)
+      const textResponse = await response.text()
+      console.error('Raw response:', textResponse)
+      return { error: `Server returned invalid JSON: ${textResponse.substring(0, 100)}...` }
+    }
 
     if (!response.ok) {
       console.error('Stripe API error response:', result)

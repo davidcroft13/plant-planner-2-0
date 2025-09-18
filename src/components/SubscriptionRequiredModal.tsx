@@ -148,8 +148,8 @@ const SubscriptionRequiredModal: React.FC<SubscriptionRequiredModalProps> = ({ i
               >
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                    <span className="bg-primary-500 text-white px-4 py-1 rounded-full text-sm font-medium shadow-lg">
-                      Most Popular
+                    <span className="bg-primary-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg whitespace-nowrap">
+                      Popular
                     </span>
                   </div>
                 )}

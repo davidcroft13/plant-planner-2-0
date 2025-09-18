@@ -8,18 +8,23 @@ const supabase = createClient(
 )
 
 export default async function handler(req, res) {
+  console.log('Checkout session request:', { method: req.method, body: req.body })
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
   try {
     const { userId, priceId } = req.body
+    console.log('Creating checkout session for:', { userId, priceId })
 
     if (!userId || !priceId) {
+      console.log('Missing parameters:', { userId: !!userId, priceId: !!priceId })
       return res.status(400).json({ error: 'Missing required parameters' })
     }
 
     // Get user from Supabase
+    console.log('Looking up user in Supabase...')
     const { data: user, error: userError } = await supabase
       .from('users')
       .select('name, email')
@@ -27,10 +32,14 @@ export default async function handler(req, res) {
       .single()
 
     if (userError || !user) {
+      console.log('User lookup error:', userError)
       return res.status(404).json({ error: 'User not found' })
     }
+    
+    console.log('User found:', { name: user.name, email: user.email })
 
     // Create Stripe checkout session
+    console.log('Creating Stripe checkout session...')
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -48,6 +57,7 @@ export default async function handler(req, res) {
       },
     })
 
+    console.log('Stripe session created:', session.id)
     res.status(200).json({ sessionId: session.id })
   } catch (error) {
     console.error('Error creating checkout session:', error)
