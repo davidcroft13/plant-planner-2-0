@@ -23,8 +23,10 @@ export interface CreatePortalSessionResponse {
 // Real API functions that call your Vercel serverless functions
 export const createCheckoutSession = async (data: CreateCheckoutSessionRequest): Promise<CreateCheckoutSessionResponse> => {
   try {
-    const baseUrl = process.env.NODE_ENV === 'production' 
-      ? (import.meta as any).env.VITE_FRONTEND_URL || 'https://plantplanner-2-0.vercel.app'
+    // Use window.location.origin for production, localhost for development
+    const isProduction = window.location.hostname !== 'localhost'
+    const baseUrl = isProduction 
+      ? (import.meta as any).env.VITE_FRONTEND_URL || window.location.origin
       : 'http://localhost:3000'
     
     console.log('Creating checkout session with:', { data, baseUrl })
@@ -57,8 +59,10 @@ export const createCheckoutSession = async (data: CreateCheckoutSessionRequest):
 
 export const createPortalSession = async (data: CreatePortalSessionRequest): Promise<CreatePortalSessionResponse> => {
   try {
-    const baseUrl = process.env.NODE_ENV === 'production' 
-      ? (import.meta as any).env.VITE_FRONTEND_URL || 'https://plantplanner-2-0.vercel.app'
+    // Use window.location.origin for production, localhost for development
+    const isProduction = window.location.hostname !== 'localhost'
+    const baseUrl = isProduction 
+      ? (import.meta as any).env.VITE_FRONTEND_URL || window.location.origin
       : 'http://localhost:3000'
     
     const response = await fetch(`${baseUrl}/api/stripe/create-customer-portal-session`, {

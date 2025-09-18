@@ -9,7 +9,7 @@ import TrialExpiredModal from './TrialExpiredModal'
 import SubscriptionRequiredModal from './SubscriptionRequiredModal'
 
 const Layout: React.FC = () => {
-  const { isTrialExpired, userProfile, hasActiveSubscription } = useAuth()
+  const { isTrialExpired, userProfile, hasActiveSubscription, loading } = useAuth()
   const [showTrialExpiredModal, setShowTrialExpiredModal] = useState(false)
   const [showSubscriptionRequiredModal, setShowSubscriptionRequiredModal] = useState(false)
 
@@ -26,14 +26,16 @@ const Layout: React.FC = () => {
       userProfile,
       subscription_status: userProfile?.subscription_status,
       hasActiveSubscription,
-      shouldShowModal: userProfile && userProfile.subscription_status === 'inactive' && !hasActiveSubscription
+      loading,
+      shouldShowModal: userProfile && userProfile.subscription_status === 'inactive' && !hasActiveSubscription && !loading
     })
     
-    if (userProfile && userProfile.subscription_status === 'inactive' && !hasActiveSubscription) {
+    // Only show modal if user is fully loaded and inactive
+    if (userProfile && !loading && userProfile.subscription_status === 'inactive' && !hasActiveSubscription) {
       console.log('Layout - Showing subscription required modal')
       setShowSubscriptionRequiredModal(true)
     }
-  }, [userProfile, hasActiveSubscription])
+  }, [userProfile, hasActiveSubscription, loading])
 
   return (
     <div className="min-h-screen bg-white">
