@@ -40,7 +40,7 @@ export default async function handler(req, res) {
         },
       ],
       mode: 'subscription',
-      success_url: `${process.env.FRONTEND_URL}/app?success=true`,
+      success_url: `${process.env.FRONTEND_URL}/checkout?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/app?canceled=true`,
       customer_email: user.email,
       metadata: {

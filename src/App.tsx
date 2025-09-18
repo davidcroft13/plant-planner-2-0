@@ -3,7 +3,6 @@ import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/AuthContext'
 import { StripeProvider } from './contexts/StripeContext'
 import Layout from './components/Layout'
-import SubscriptionChecker from './components/SubscriptionChecker'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
@@ -25,7 +24,6 @@ function App() {
       <AuthProvider>
         <Router>
           <div className="min-h-screen bg-white">
-            <SubscriptionChecker />
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />

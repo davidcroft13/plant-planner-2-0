@@ -54,7 +54,6 @@ const Layout: React.FC = () => {
       
       <SubscriptionRequiredModal 
         isOpen={showSubscriptionRequiredModal}
-        onClose={() => setShowSubscriptionRequiredModal(false)}
       />
     </div>
   )

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { X, Check } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useStripeContext } from '../contexts/StripeContext'
 import { createClient } from '@supabase/supabase-js'
@@ -11,11 +11,10 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 interface SubscriptionRequiredModalProps {
   isOpen: boolean
-  onClose: () => void
 }
 
-const SubscriptionRequiredModal: React.FC<SubscriptionRequiredModalProps> = ({ isOpen, onClose }) => {
-  const { userProfile, signOut } = useAuth()
+const SubscriptionRequiredModal: React.FC<SubscriptionRequiredModalProps> = ({ isOpen }) => {
+  const { userProfile } = useAuth()
   const { createCheckoutSession } = useStripeContext()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -121,12 +120,7 @@ const SubscriptionRequiredModal: React.FC<SubscriptionRequiredModalProps> = ({ i
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Choose Your Plan</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
+            {/* Remove close button - users must select a plan */}
           </div>
 
           <div className="text-center mb-8">
@@ -194,14 +188,7 @@ const SubscriptionRequiredModal: React.FC<SubscriptionRequiredModalProps> = ({ i
             ))}
           </div>
 
-          <div className="text-center">
-            <button
-              onClick={signOut}
-              className="text-gray-500 hover:text-gray-700 text-sm"
-            >
-              Sign out
-            </button>
-          </div>
+          {/* Removed sign out button - users must select a plan */}
         </div>
       </div>
     </div>
