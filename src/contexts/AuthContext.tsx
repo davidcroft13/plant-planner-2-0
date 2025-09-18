@@ -157,11 +157,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Error fetching user profile:', error)
-        setLoading(false)
-        return
-      }
+        
+        // If profile doesn't exist, create one
+        if (error.code === 'PGRST116') {
+          console.log('User profile not found, creating one...')
+          const { data: userData } = await supabase.auth.getUser()
+          
+          if (userData?.user) {
+            const { error: createError } = await supabase
+              .from('users')
+              .insert({
+                id: userData.user.id,
+                email: userData.user.email,
+                name: userData.user.user_metadata?.name || 'User',
+                role: 'user',
+                subscription_status: 'inactive',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              })
 
-      setUserProfile(data)
+            if (createError) {
+              console.error('Error creating user profile:', createError)
+              setLoading(false)
+              return
+            }
+
+            // Fetch the newly created profile
+            const { data: newProfile, error: fetchError } = await supabase
+              .from('users')
+              .select('*')
+              .eq('id', userId)
+              .single()
+
+            if (fetchError) {
+              console.error('Error fetching new user profile:', fetchError)
+              setLoading(false)
+              return
+            }
+
+            setUserProfile(newProfile)
+          }
+        } else {
+          setLoading(false)
+          return
+        }
+      } else {
+        setUserProfile(data)
+      }
     } catch (error) {
       console.error('Error fetching user profile:', error)
     } finally {

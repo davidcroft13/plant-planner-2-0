@@ -22,7 +22,15 @@ const Layout: React.FC = () => {
 
   // Show subscription required modal for inactive users
   React.useEffect(() => {
+    console.log('Layout - Checking subscription modal:', {
+      userProfile,
+      subscription_status: userProfile?.subscription_status,
+      hasActiveSubscription,
+      shouldShowModal: userProfile && userProfile.subscription_status === 'inactive' && !hasActiveSubscription
+    })
+    
     if (userProfile && userProfile.subscription_status === 'inactive' && !hasActiveSubscription) {
+      console.log('Layout - Showing subscription required modal')
       setShowSubscriptionRequiredModal(true)
     }
   }, [userProfile, hasActiveSubscription])
