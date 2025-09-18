@@ -27,6 +27,8 @@ export const createCheckoutSession = async (data: CreateCheckoutSessionRequest):
       ? (import.meta as any).env.VITE_FRONTEND_URL || 'https://plantplanner-2-0.vercel.app'
       : 'http://localhost:3000'
     
+    console.log('Creating checkout session with:', { data, baseUrl })
+    
     const response = await fetch(`${baseUrl}/api/stripe/create-checkout-session`, {
       method: 'POST',
       headers: {
@@ -35,9 +37,12 @@ export const createCheckoutSession = async (data: CreateCheckoutSessionRequest):
       body: JSON.stringify(data),
     })
 
+    console.log('Stripe API response status:', response.status)
     const result = await response.json()
+    console.log('Stripe API response:', result)
 
     if (!response.ok) {
+      console.error('Stripe API error response:', result)
       return { error: result.error || 'Failed to create checkout session' }
     }
 
@@ -45,7 +50,7 @@ export const createCheckoutSession = async (data: CreateCheckoutSessionRequest):
   } catch (error) {
     console.error('Stripe API error:', error)
     return {
-      error: 'Failed to create checkout session'
+      error: `Failed to create checkout session: ${error}`
     }
   }
 }

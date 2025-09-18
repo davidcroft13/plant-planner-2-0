@@ -17,6 +17,7 @@ import WorkoutsPage from './pages/WorkoutsPage'
 import AccountPage from './pages/AccountPage'
 import AdminPortal from './pages/AdminPortal'
 import CreatorPortal from './pages/CreatorPortal'
+import CheckoutPage from './pages/CheckoutPage'
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/app" element={<Layout />}>

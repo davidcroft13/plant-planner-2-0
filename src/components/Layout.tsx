@@ -6,10 +6,12 @@ import BottomNavigation from './BottomNavigation'
 import IntercomWidget from './IntercomWidget'
 import TrialWarning from './TrialWarning'
 import TrialExpiredModal from './TrialExpiredModal'
+import SubscriptionRequiredModal from './SubscriptionRequiredModal'
 
 const Layout: React.FC = () => {
-  const { isTrialExpired } = useAuth()
+  const { isTrialExpired, userProfile, hasActiveSubscription } = useAuth()
   const [showTrialExpiredModal, setShowTrialExpiredModal] = useState(false)
+  const [showSubscriptionRequiredModal, setShowSubscriptionRequiredModal] = useState(false)
 
   // Show trial expired modal if trial is expired
   React.useEffect(() => {
@@ -17,6 +19,13 @@ const Layout: React.FC = () => {
       setShowTrialExpiredModal(true)
     }
   }, [isTrialExpired])
+
+  // Show subscription required modal for inactive users
+  React.useEffect(() => {
+    if (userProfile && userProfile.subscription_status === 'inactive' && !hasActiveSubscription) {
+      setShowSubscriptionRequiredModal(true)
+    }
+  }, [userProfile, hasActiveSubscription])
 
   return (
     <div className="min-h-screen bg-white">
@@ -31,6 +40,11 @@ const Layout: React.FC = () => {
       <TrialExpiredModal 
         isOpen={showTrialExpiredModal}
         onClose={() => setShowTrialExpiredModal(false)}
+      />
+      
+      <SubscriptionRequiredModal 
+        isOpen={showSubscriptionRequiredModal}
+        onClose={() => setShowSubscriptionRequiredModal(false)}
       />
     </div>
   )
