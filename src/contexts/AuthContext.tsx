@@ -164,12 +164,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const { data: userData } = await supabase.auth.getUser()
           
           if (userData?.user) {
+            // Check for pending name in session storage first, then user metadata
+            const pendingName = sessionStorage.getItem('pending_user_name')
+            const userName = pendingName || userData.user.user_metadata?.name || 'User'
+            
+            if (pendingName) {
+              console.log('Using pending name from session storage:', pendingName)
+              sessionStorage.removeItem('pending_user_name')
+            }
+            
             const { error: createError } = await supabase
               .from('users')
               .insert({
                 id: userData.user.id,
                 email: userData.user.email,
-                name: userData.user.user_metadata?.name || 'User',
+                name: userName,
                 role: 'user',
                 subscription_status: 'inactive',
                 created_at: new Date().toISOString(),
@@ -195,6 +204,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               return
             }
 
+            console.log('Created user profile with name:', newProfile.name)
             setUserProfile(newProfile)
           }
         } else {
@@ -202,6 +212,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return
         }
       } else {
+        console.log('Fetched existing user profile with name:', data.name)
         setUserProfile(data)
       }
     } catch (error) {
