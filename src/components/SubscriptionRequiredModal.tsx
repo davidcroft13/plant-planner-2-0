@@ -36,8 +36,14 @@ const SubscriptionRequiredModal: React.FC<SubscriptionRequiredModalProps> = ({ i
       }
 
       if (sessionId) {
-        // Redirect to Stripe Checkout
-        window.location.href = `/checkout?session_id=${sessionId}`
+        // Redirect to Stripe's hosted checkout page
+        const stripe = await import('@stripe/stripe-js').then(module => module.loadStripe((import.meta as any).env.VITE_STRIPE_PUBLISHABLE_KEY))
+        if (stripe) {
+          const { error } = await stripe.redirectToCheckout({ sessionId })
+          if (error) {
+            setError(error.message || 'Failed to redirect to checkout')
+          }
+        }
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.')

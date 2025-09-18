@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
+import { createClient } from '@supabase/supabase-js'
+
+// Get environment variables
+const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL
+const supabaseKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 const CheckoutPage: React.FC = () => {
   const [searchParams] = useSearchParams()
@@ -17,17 +23,48 @@ const CheckoutPage: React.FC = () => {
       return
     }
 
-    // In a real implementation, you would verify the session with Stripe
-    // For now, we'll simulate a successful checkout
-    setTimeout(() => {
-      setStatus('success')
-      setMessage('Payment successful! Redirecting to your dashboard...')
-      
-      // Redirect to app after 3 seconds
-      setTimeout(() => {
-        navigate('/app')
-      }, 3000)
-    }, 2000)
+    // Verify the session with Stripe and update user subscription
+    const verifyPayment = async () => {
+      try {
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          setStatus('error')
+          setMessage('User not authenticated')
+          return
+        }
+
+        // Update user subscription status to active
+        const { error } = await supabase
+          .from('users')
+          .update({
+            subscription_status: 'active',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', user.id)
+
+        if (error) {
+          console.error('Error updating subscription status:', error)
+          setStatus('error')
+          setMessage('Payment successful but failed to update subscription. Please contact support.')
+          return
+        }
+
+        setStatus('success')
+        setMessage('Payment successful! Redirecting to your dashboard...')
+        
+        // Redirect to app after 3 seconds
+        setTimeout(() => {
+          navigate('/app')
+        }, 3000)
+      } catch (error) {
+        console.error('Error verifying payment:', error)
+        setStatus('error')
+        setMessage('Failed to verify payment. Please contact support.')
+      }
+    }
+
+    verifyPayment()
   }, [searchParams, navigate])
 
   return (
