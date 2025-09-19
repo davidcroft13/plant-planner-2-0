@@ -27,10 +27,28 @@ const BillingPage: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [availablePlans, setAvailablePlans] = useState<any[]>([])
+  const [plansLoading, setPlansLoading] = useState(false)
 
   useEffect(() => {
     loadBillingInfo()
+    loadAvailablePlans()
   }, [user])
+
+  const loadAvailablePlans = async () => {
+    setPlansLoading(true)
+    try {
+      const response = await fetch('/api/stripe/get-prices')
+      const data = await response.json()
+      if (data.prices) {
+        setAvailablePlans(data.prices)
+      }
+    } catch (error) {
+      console.error('Error loading available plans:', error)
+    } finally {
+      setPlansLoading(false)
+    }
+  }
 
   const loadBillingInfo = async () => {
     if (!user) return
@@ -59,10 +77,10 @@ const BillingPage: React.FC = () => {
     }
   }
 
-  const handleUpgradePlan = async () => {
+  const handleUpgradePlan = async (priceId?: string) => {
     setLoading(true)
     try {
-      const { error } = await createCheckoutSession(user?.id || '', 'monthly')
+      const { error } = await createCheckoutSession(user?.id || '', priceId || 'monthly')
       if (error) {
         alert('Error creating checkout session. Please try again.')
         return
@@ -195,83 +213,45 @@ const BillingPage: React.FC = () => {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
               <h3 className="text-xl font-semibold text-gray-900 mb-6">Available Plans</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Monthly Plan */}
-                <div className="border border-gray-200 rounded-xl p-6 hover:border-green-500 transition-colors">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-lg font-semibold text-gray-900">Monthly Plan</h4>
-                    <span className="text-2xl font-bold text-gray-900">$29.99</span>
-                  </div>
-                  <p className="text-gray-600 mb-4">Billed monthly</p>
-                  <ul className="space-y-2 mb-6">
-                    <li className="flex items-center text-sm text-gray-600">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                      Unlimited recipes
-                    </li>
-                    <li className="flex items-center text-sm text-gray-600">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                      Meal planning
-                    </li>
-                    <li className="flex items-center text-sm text-gray-600">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                      Workout plans
-                    </li>
-                    <li className="flex items-center text-sm text-gray-600">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                      Priority support
-                    </li>
-                  </ul>
-                  <button
-                    onClick={handleUpgradePlan}
-                    disabled={loading || billingInfo?.subscription_status === 'active'}
-                    className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {billingInfo?.subscription_status === 'active' ? 'Current Plan' : 'Upgrade to Monthly'}
-                  </button>
+              {plansLoading ? (
+                <div className="text-center py-8">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                  <p className="mt-2 text-gray-600">Loading plans...</p>
                 </div>
-
-                {/* Yearly Plan */}
-                <div className="border border-gray-200 rounded-xl p-6 hover:border-green-500 transition-colors relative">
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                      Save 20%
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-lg font-semibold text-gray-900">Yearly Plan</h4>
-                    <div>
-                      <span className="text-2xl font-bold text-gray-900">$287.90</span>
-                      <span className="text-sm text-gray-500 ml-1">/year</span>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {availablePlans.map((plan, index) => (
+                    <div key={plan.id} className="border border-gray-200 rounded-xl p-6 hover:border-green-500 transition-colors relative">
+                      {index === 1 && (
+                        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                          <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                            Popular
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-lg font-semibold text-gray-900">{plan.name}</h4>
+                        <span className="text-2xl font-bold text-gray-900">
+                          ${(plan.amount / 100).toFixed(2)}
+                        </span>
+                      </div>
+                      <p className="text-gray-600 mb-4">
+                        Billed {plan.interval_count > 1 ? `every ${plan.interval_count} ${plan.interval}s` : plan.interval}
+                      </p>
+                      {plan.description && (
+                        <p className="text-sm text-gray-600 mb-4">{plan.description}</p>
+                      )}
+                      <button
+                        onClick={() => handleUpgradePlan(plan.id)}
+                        disabled={loading || billingInfo?.subscription_status === 'active'}
+                        className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {billingInfo?.subscription_status === 'active' ? 'Current Plan' : `Upgrade to ${plan.name}`}
+                      </button>
                     </div>
-                  </div>
-                  <p className="text-gray-600 mb-4">Billed annually</p>
-                  <ul className="space-y-2 mb-6">
-                    <li className="flex items-center text-sm text-gray-600">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                      Everything in Monthly
-                    </li>
-                    <li className="flex items-center text-sm text-gray-600">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                      Advanced analytics
-                    </li>
-                    <li className="flex items-center text-sm text-gray-600">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                      Early access to features
-                    </li>
-                    <li className="flex items-center text-sm text-gray-600">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                      20% savings
-                    </li>
-                  </ul>
-                  <button
-                    onClick={() => setShowUpgradeModal(true)}
-                    disabled={loading || billingInfo?.subscription_status === 'active'}
-                    className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {billingInfo?.subscription_status === 'active' ? 'Current Plan' : 'Upgrade to Yearly'}
-                  </button>
+                  ))}
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Billing Management */}

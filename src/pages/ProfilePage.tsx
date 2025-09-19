@@ -21,6 +21,9 @@ const ProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null)
+  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
 
   useEffect(() => {
     if (userProfile) {
@@ -29,8 +32,69 @@ const ProfilePage: React.FC = () => {
         name: userProfile.name || '',
         email: user?.email || ''
       }))
+      // Set profile image preview if it exists
+      if (userProfile.profile_image_url) {
+        setProfileImagePreview(userProfile.profile_image_url)
+      }
     }
   }, [userProfile, user])
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setProfileImageFile(file)
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setProfileImagePreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const uploadProfileImage = async () => {
+    if (!profileImageFile || !user) return
+
+    setUploadingImage(true)
+    try {
+      const fileExt = profileImageFile.name.split('.').pop()
+      const fileName = `${user.id}-profile-${Date.now()}.${fileExt}`
+      const filePath = `profile-images/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('profile-images')
+        .upload(filePath, profileImageFile)
+
+      if (uploadError) {
+        console.error('Error uploading profile image:', uploadError)
+        return
+      }
+
+      const { data } = supabase.storage
+        .from('profile-images')
+        .getPublicUrl(filePath)
+
+      // Update user profile with new image URL
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          profile_image_url: data.publicUrl,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id)
+
+      if (updateError) {
+        console.error('Error updating profile image:', updateError)
+      } else {
+        console.log('Profile image updated successfully')
+        // Refresh the page to update the auth context
+        window.location.reload()
+      }
+    } catch (error) {
+      console.error('Error uploading profile image:', error)
+    } finally {
+      setUploadingImage(false)
+    }
+  }
 
   const handleEdit = (field: string) => {
     setEditingField(field)
@@ -130,14 +194,45 @@ const ProfilePage: React.FC = () => {
             {/* Photo */}
             <div className="flex items-center justify-between py-6 border-b border-gray-100">
               <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-semibold text-xl">
-                    {(userProfile?.name || 'U').charAt(0).toUpperCase()}
-                  </span>
+                <div className="relative">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center overflow-hidden">
+                    {profileImagePreview ? (
+                      <img 
+                        src={profileImagePreview} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-white font-semibold text-xl">
+                        {(userProfile?.name || 'U').charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  {profileImageFile && (
+                    <button
+                      onClick={uploadProfileImage}
+                      disabled={uploadingImage}
+                      className="absolute -bottom-1 -right-1 bg-green-600 text-white rounded-full p-1 hover:bg-green-700 disabled:opacity-50"
+                    >
+                      {uploadingImage ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </button>
+                  )}
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Photo</h3>
                   <p className="text-sm text-gray-500">Your profile picture</p>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="mt-2 text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                  />
                 </div>
               </div>
             </div>

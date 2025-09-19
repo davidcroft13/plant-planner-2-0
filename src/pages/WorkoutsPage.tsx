@@ -249,6 +249,26 @@ const WorkoutsPage: React.FC = () => {
                           {exercise.notes && (
                             <p className="text-gray-600 mb-4">{exercise.notes}</p>
                           )}
+                          
+                          {/* Exercise Media */}
+                          {(exercise.image_url || exercise.video_url) && (
+                            <div className="flex space-x-4 mt-4">
+                              {exercise.image_url && (
+                                <img 
+                                  src={exercise.image_url} 
+                                  alt={exercise.name}
+                                  className="w-32 h-32 object-cover rounded-lg"
+                                />
+                              )}
+                              {exercise.video_url && (
+                                <video 
+                                  src={exercise.video_url}
+                                  className="w-32 h-32 object-cover rounded-lg"
+                                  controls
+                                />
+                              )}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

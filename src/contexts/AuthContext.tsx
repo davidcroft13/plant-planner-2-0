@@ -10,6 +10,7 @@ interface UserProfile {
   stripe_customer_id?: string
   subscription_id?: string
   trial_ends_at?: string
+  profile_image_url?: string
   created_at: string
   updated_at: string
 }
