@@ -4,16 +4,5 @@
       "source": "/((?!api/.*).*)",
       "destination": "/index.html"
     }
-  ],
-  "functions": {
-    "api/stripe/create-checkout-session.js": {
-      "runtime": "nodejs18.x"
-    },
-    "api/stripe/create-customer-portal-session.js": {
-      "runtime": "nodejs18.x"
-    },
-    "api/stripe/webhook.js": {
-      "runtime": "nodejs18.x"
-    }
-  }
+  ]
 }
