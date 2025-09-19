@@ -40,6 +40,11 @@ export default async function handler(req, res) {
 
     // Create Stripe checkout session
     console.log('Creating Stripe checkout session...')
+    
+    // Use the correct frontend URL - hardcoded to ensure it works
+    const frontendUrl = process.env.FRONTEND_URL || 'https://plant-planner-3-0.vercel.app'
+    console.log('Using frontend URL:', frontendUrl)
+    
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -49,8 +54,8 @@ export default async function handler(req, res) {
         },
       ],
       mode: 'subscription',
-      success_url: `${process.env.FRONTEND_URL}/checkout?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.FRONTEND_URL}/app`,
+      success_url: `${frontendUrl}/checkout?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${frontendUrl}/app`,
       customer_email: user.email,
       metadata: {
         userId: userId,
