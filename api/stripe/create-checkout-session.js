@@ -50,6 +50,8 @@ export default async function handler(req, res) {
       frontendUrl = `${protocol}://${host}`
     }
     console.log('Using frontend URL:', frontendUrl)
+    console.log('Request headers:', { host: req.headers.host, 'x-forwarded-proto': req.headers['x-forwarded-proto'] })
+    console.log('Environment FRONTEND_URL:', process.env.FRONTEND_URL)
     
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -61,7 +63,7 @@ export default async function handler(req, res) {
       ],
       mode: 'subscription',
       success_url: `${frontendUrl}/checkout?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${frontendUrl}/`,
+      cancel_url: `${frontendUrl}/app`,
       customer_email: user.email,
       metadata: {
         userId: userId,
