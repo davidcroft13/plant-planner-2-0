@@ -34,7 +34,36 @@ const CheckoutPage: React.FC = () => {
           return
         }
 
-        // Update user subscription status to active
+        // Wait a moment for webhook to process, then check subscription status
+        await new Promise(resolve => setTimeout(resolve, 2000))
+
+        // Check current subscription status
+        const { data: userProfile, error: fetchError } = await supabase
+          .from('users')
+          .select('subscription_status')
+          .eq('id', user.id)
+          .single()
+
+        if (fetchError) {
+          console.error('Error fetching user profile:', fetchError)
+          setStatus('error')
+          setMessage('Failed to verify subscription status. Please contact support.')
+          return
+        }
+
+        // If subscription is already active (webhook processed), show success
+        if (userProfile.subscription_status === 'active') {
+          setStatus('success')
+          setMessage('Payment successful! Redirecting to your dashboard...')
+          
+          // Redirect to app after 3 seconds
+          setTimeout(() => {
+            navigate('/app')
+          }, 3000)
+          return
+        }
+
+        // If webhook hasn't processed yet, manually update subscription status
         const { error } = await supabase
           .from('users')
           .update({
