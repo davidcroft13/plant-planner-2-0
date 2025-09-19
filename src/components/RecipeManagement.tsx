@@ -238,23 +238,6 @@ const RecipeManagement: React.FC = () => {
     }
   }
 
-  const handleTogglePublish = async (recipe: Recipe) => {
-    try {
-      const newStatus = !recipe.is_published
-      const { error } = await supabase
-        .from('recipes')
-        .update({ 
-          is_published: newStatus,
-          published_at: newStatus ? new Date().toISOString() : null
-        })
-        .eq('id', recipe.id)
-      
-      if (error) throw error
-      fetchRecipes()
-    } catch (error) {
-      console.error('Error toggling publish status:', error)
-    }
-  }
 
   const handleToggleFavorite = async (recipe: Recipe) => {
     try {
@@ -615,8 +598,8 @@ const RecipeManagement: React.FC = () => {
                   </div>
                 )}
                 
-                {/* Publish Toggle */}
-                <div className="absolute top-3 right-3 flex space-x-2">
+                {/* Favorite Toggle */}
+                <div className="absolute top-3 right-3">
                   <button
                     onClick={() => handleToggleFavorite(recipe)}
                     className={`w-12 h-6 rounded-full transition-colors ${
@@ -626,17 +609,6 @@ const RecipeManagement: React.FC = () => {
                   >
                     <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${
                       recipe.is_favorite ? 'translate-x-6' : 'translate-x-0.5'
-                    }`} />
-                  </button>
-                  <button
-                    onClick={() => handleTogglePublish(recipe)}
-                    className={`w-12 h-6 rounded-full transition-colors ${
-                      recipe.is_published ? 'bg-green-500' : 'bg-gray-300'
-                    }`}
-                    title={recipe.is_published ? 'Unpublish' : 'Publish'}
-                  >
-                    <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${
-                      recipe.is_published ? 'translate-x-6' : 'translate-x-0.5'
                     }`} />
                   </button>
                 </div>

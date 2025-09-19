@@ -8,6 +8,24 @@ const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL
 const supabaseKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY
 const supabase = createClient(supabaseUrl, supabaseKey)
 
+interface CourseSection {
+  id: string
+  title: string
+  items: CourseItem[]
+}
+
+interface CourseItem {
+  id: string
+  title: string
+  type: 'workout' | 'exercise' | 'meal' | 'article' | 'video'
+  content_id?: string
+  duration?: number
+  description?: string
+  image_url?: string
+  video_url?: string
+  completed?: boolean
+}
+
 interface Course {
   id: string
   title: string
@@ -16,6 +34,7 @@ interface Course {
   duration?: number
   difficulty: string
   category?: string
+  sections?: CourseSection[]
   is_published: boolean
   created_at: string
   updated_at: string
@@ -30,6 +49,12 @@ const CourseManagement: React.FC = () => {
   const [editingCourse, setEditingCourse] = useState<Course | null>(null)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [sections, setSections] = useState<CourseSection[]>([])
+  const [showSectionForm, setShowSectionForm] = useState(false)
+  const [editingSection, setEditingSection] = useState<CourseSection | null>(null)
+  const [showItemForm, setShowItemForm] = useState(false)
+  const [editingItem, setEditingItem] = useState<CourseItem | null>(null)
+  const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null)
 
   // Form states
   const [formData, setFormData] = useState({
@@ -40,6 +65,20 @@ const CourseManagement: React.FC = () => {
     category: '',
     image_url: '',
     is_published: false
+  })
+
+  const [sectionFormData, setSectionFormData] = useState({
+    title: ''
+  })
+
+  const [itemFormData, setItemFormData] = useState({
+    title: '',
+    type: 'workout' as 'workout' | 'exercise' | 'meal' | 'article' | 'video',
+    content_id: '',
+    duration: '',
+    description: '',
+    image_url: '',
+    video_url: ''
   })
 
   useEffect(() => {
@@ -200,6 +239,112 @@ const CourseManagement: React.FC = () => {
     } catch (error) {
       console.error('Error deleting course:', error)
     }
+  }
+
+  // Section management functions
+  const handleCreateSection = () => {
+    setEditingSection(null)
+    setSectionFormData({ title: '' })
+    setShowSectionForm(true)
+  }
+
+  const handleEditSection = (section: CourseSection) => {
+    setEditingSection(section)
+    setSectionFormData({ title: section.title })
+    setShowSectionForm(true)
+  }
+
+  const handleSaveSection = () => {
+    if (!sectionFormData.title.trim()) return
+
+    const newSection: CourseSection = {
+      id: editingSection?.id || Date.now().toString(),
+      title: sectionFormData.title,
+      items: editingSection?.items || []
+    }
+
+    if (editingSection) {
+      setSections(prev => prev.map(s => s.id === editingSection.id ? newSection : s))
+    } else {
+      setSections(prev => [...prev, newSection])
+    }
+
+    setShowSectionForm(false)
+    setEditingSection(null)
+  }
+
+  const handleDeleteSection = (sectionId: string) => {
+    setSections(prev => prev.filter(s => s.id !== sectionId))
+  }
+
+  // Item management functions
+  const handleCreateItem = (sectionId: string) => {
+    setSelectedSectionId(sectionId)
+    setEditingItem(null)
+    setItemFormData({
+      title: '',
+      type: 'workout',
+      content_id: '',
+      duration: '',
+      description: '',
+      image_url: '',
+      video_url: ''
+    })
+    setShowItemForm(true)
+  }
+
+  const handleEditItem = (item: CourseItem, sectionId: string) => {
+    setSelectedSectionId(sectionId)
+    setEditingItem(item)
+    setItemFormData({
+      title: item.title,
+      type: item.type,
+      content_id: item.content_id || '',
+      duration: item.duration?.toString() || '',
+      description: item.description || '',
+      image_url: item.image_url || '',
+      video_url: item.video_url || ''
+    })
+    setShowItemForm(true)
+  }
+
+  const handleSaveItem = () => {
+    if (!itemFormData.title.trim() || !selectedSectionId) return
+
+    const newItem: CourseItem = {
+      id: editingItem?.id || Date.now().toString(),
+      title: itemFormData.title,
+      type: itemFormData.type,
+      content_id: itemFormData.content_id || undefined,
+      duration: itemFormData.duration ? parseInt(itemFormData.duration) : undefined,
+      description: itemFormData.description || undefined,
+      image_url: itemFormData.image_url || undefined,
+      video_url: itemFormData.video_url || undefined,
+      completed: editingItem?.completed || false
+    }
+
+    setSections(prev => prev.map(section => 
+      section.id === selectedSectionId 
+        ? {
+            ...section,
+            items: editingItem 
+              ? section.items.map(item => item.id === editingItem.id ? newItem : item)
+              : [...section.items, newItem]
+          }
+        : section
+    ))
+
+    setShowItemForm(false)
+    setEditingItem(null)
+    setSelectedSectionId(null)
+  }
+
+  const handleDeleteItem = (itemId: string, sectionId: string) => {
+    setSections(prev => prev.map(section => 
+      section.id === sectionId 
+        ? { ...section, items: section.items.filter(item => item.id !== itemId) }
+        : section
+    ))
   }
 
   const filteredCourses = courses.filter(course =>
@@ -445,6 +590,85 @@ const CourseManagement: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Course Sections */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <label className="block text-sm font-medium text-gray-700">Course Sections</label>
+                    <button
+                      type="button"
+                      onClick={handleCreateSection}
+                      className="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 transition-colors text-sm"
+                    >
+                      Add Section
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {sections.map((section) => (
+                      <div key={section.id} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-medium text-gray-900">{section.title}</h4>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              type="button"
+                              onClick={() => handleCreateItem(section.id)}
+                              className="text-green-600 hover:text-green-700 text-sm"
+                            >
+                              Add Item
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleEditSection(section)}
+                              className="text-blue-600 hover:text-blue-700 text-sm"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteSection(section.id)}
+                              className="text-red-600 hover:text-red-700 text-sm"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          {section.items.map((item) => (
+                            <div key={item.id} className="flex items-center justify-between bg-gray-50 rounded p-2">
+                              <div className="flex items-center space-x-2">
+                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                  {item.type}
+                                </span>
+                                <span className="text-sm text-gray-900">{item.title}</span>
+                                {item.duration && (
+                                  <span className="text-xs text-gray-500">{item.duration}min</span>
+                                )}
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <button
+                                  type="button"
+                                  onClick={() => handleEditItem(item, section.id)}
+                                  className="text-blue-600 hover:text-blue-700 text-xs"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteItem(item.id, section.id)}
+                                  className="text-red-600 hover:text-red-700 text-xs"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="flex items-center">
                   <input
                     type="checkbox"
@@ -474,6 +698,159 @@ const CourseManagement: React.FC = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Section Form Modal */}
+      {showSectionForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {editingSection ? 'Edit Section' : 'Create Section'}
+                </h3>
+                <button
+                  onClick={() => setShowSectionForm(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Section Title</label>
+                  <input
+                    type="text"
+                    value={sectionFormData.title}
+                    onChange={(e) => setSectionFormData({ title: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Enter section title"
+                    required
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowSectionForm(false)}
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveSection}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  >
+                    {editingSection ? 'Update' : 'Create'} Section
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Item Form Modal */}
+      {showItemForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-lg w-full">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {editingItem ? 'Edit Item' : 'Create Item'}
+                </h3>
+                <button
+                  onClick={() => setShowItemForm(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Item Title</label>
+                  <input
+                    type="text"
+                    value={itemFormData.title}
+                    onChange={(e) => setItemFormData(prev => ({ ...prev, title: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Enter item title"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                  <select
+                    value={itemFormData.type}
+                    onChange={(e) => setItemFormData(prev => ({ ...prev, type: e.target.value as any }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  >
+                    <option value="workout">Workout</option>
+                    <option value="exercise">Exercise</option>
+                    <option value="meal">Meal</option>
+                    <option value="article">Article</option>
+                    <option value="video">Video</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Content ID (optional)</label>
+                  <input
+                    type="text"
+                    value={itemFormData.content_id}
+                    onChange={(e) => setItemFormData(prev => ({ ...prev, content_id: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Link to existing content"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Duration (min)</label>
+                    <input
+                      type="number"
+                      value={itemFormData.duration}
+                      onChange={(e) => setItemFormData(prev => ({ ...prev, duration: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                  <textarea
+                    value={itemFormData.description}
+                    onChange={(e) => setItemFormData(prev => ({ ...prev, description: e.target.value }))}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Enter item description"
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowItemForm(false)}
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveItem}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  >
+                    {editingItem ? 'Update' : 'Create'} Item
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

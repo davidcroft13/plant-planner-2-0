@@ -6,6 +6,7 @@ import RecipeManagement from '../components/RecipeManagement'
 import WorkoutManagement from '../components/WorkoutManagement'
 import CourseManagement from '../components/CourseManagement'
 import PostManagement from '../components/PostManagement'
+import SettingsManagement from '../components/SettingsManagement'
 
 // Get environment variables
 const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL
@@ -22,7 +23,7 @@ interface ContentStats {
 const CreatorPortal: React.FC = () => {
   const { userProfile } = useAuth()
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState<'overview' | 'recipes' | 'workouts' | 'courses' | 'posts'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'recipes' | 'workouts' | 'courses' | 'posts' | 'settings'>('overview')
   const [stats, setStats] = useState<ContentStats>({
     recipes: { total: 0, published: 0, draft: 0 },
     workouts: { total: 0, published: 0, draft: 0 },
@@ -117,7 +118,8 @@ const CreatorPortal: React.FC = () => {
     { id: 'recipes', name: 'Recipes', icon: '🍳' },
     { id: 'workouts', name: 'Workouts', icon: '💪' },
     { id: 'courses', name: 'Courses', icon: '📚' },
-    { id: 'posts', name: 'Posts', icon: '📝' }
+    { id: 'posts', name: 'Posts', icon: '📝' },
+    { id: 'settings', name: 'Settings', icon: '⚙️' }
   ]
 
   return (
@@ -190,14 +192,16 @@ const CreatorPortal: React.FC = () => {
                  activeTab === 'recipes' ? 'Recipes' :
                  activeTab === 'workouts' ? 'Workouts' :
                  activeTab === 'courses' ? 'Courses' :
-                 activeTab === 'posts' ? 'Posts' : 'Creator Portal'}
+                 activeTab === 'posts' ? 'Posts' :
+                 activeTab === 'settings' ? 'Settings' : 'Creator Portal'}
               </h1>
               <p className="text-gray-600 text-sm mt-1">
                 {activeTab === 'overview' ? 'Content overview and quick actions' :
                  activeTab === 'recipes' ? 'Manage your recipes' :
                  activeTab === 'workouts' ? 'Manage your workouts' :
                  activeTab === 'courses' ? 'Manage your courses' :
-                 activeTab === 'posts' ? 'Manage your posts' : 'Manage your content'}
+                 activeTab === 'posts' ? 'Manage your posts' :
+                 activeTab === 'settings' ? 'Customize your app settings' : 'Manage your content'}
               </p>
             </div>
             <div className="flex items-center space-x-4">
@@ -311,6 +315,8 @@ const CreatorPortal: React.FC = () => {
                {activeTab === 'courses' && <CourseManagement />}
 
           {activeTab === 'posts' && <PostManagement />}
+
+          {activeTab === 'settings' && <SettingsManagement />}
         </div>
       </div>
     </div>
