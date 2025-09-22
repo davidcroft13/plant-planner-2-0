@@ -41,17 +41,9 @@ export default async function handler(req, res) {
     // Create Stripe checkout session
     console.log('Creating Stripe checkout session...')
     
-    // Use the correct frontend URL - try environment variable first, then construct from request
-    let frontendUrl = process.env.FRONTEND_URL
-    if (!frontendUrl) {
-      // Construct URL from request headers
-      const protocol = req.headers['x-forwarded-proto'] || 'https'
-      const host = req.headers.host
-      frontendUrl = `${protocol}://${host}`
-    }
+    // Use the correct frontend URL - hardcode the correct domain
+    const frontendUrl = 'https://plant-planner-3-0.vercel.app'
     console.log('Using frontend URL:', frontendUrl)
-    console.log('Request headers:', { host: req.headers.host, 'x-forwarded-proto': req.headers['x-forwarded-proto'] })
-    console.log('Environment FRONTEND_URL:', process.env.FRONTEND_URL)
     
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
