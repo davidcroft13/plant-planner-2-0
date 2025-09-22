@@ -25,6 +25,7 @@ interface AuthContextType {
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<{ error: any }>
   activateTrial: () => Promise<{ error: any }>
+  refreshUserData: () => Promise<void>
   isAdmin: boolean
   hasActiveSubscription: boolean
   isTrialExpired: boolean
@@ -347,6 +348,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
+  const refreshUserData = async () => {
+    try {
+      console.log('Refreshing user data...')
+      setLoading(true)
+      
+      // Clear cached data
+      setUserProfile(null)
+      
+      // Get fresh session
+      const { data: { session: freshSession } } = await supabase.auth.getSession()
+      setSession(freshSession)
+      setUser(freshSession?.user ?? null)
+      
+      if (freshSession?.user) {
+        // Fetch fresh user profile
+        await fetchUserProfile(freshSession.user.id)
+      }
+      
+      console.log('User data refreshed successfully')
+    } catch (error) {
+      console.error('Error refreshing user data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const value = {
     user,
     userProfile,
@@ -357,6 +384,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signOut,
     resetPassword,
     activateTrial,
+    refreshUserData,
     isAdmin: userProfile?.role === 'admin',
     hasActiveSubscription,
     isTrialExpired,

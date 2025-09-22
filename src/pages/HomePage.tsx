@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Clock, Heart, Users } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
+import { useAuth } from '../contexts/AuthContext'
 
 // Get environment variables
 const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL
@@ -68,10 +69,19 @@ const HomePage: React.FC = () => {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null)
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null)
   const [selectedPost, setSelectedPost] = useState<Post | null>(null)
+  const [searchParams] = useSearchParams()
+  const { refreshUserData } = useAuth()
 
   useEffect(() => {
     fetchPublishedContent()
-  }, [])
+    
+    // Check if user just completed payment (redirected from Stripe)
+    const paymentSuccess = searchParams.get('payment_success')
+    if (paymentSuccess === 'true') {
+      // Refresh user data to get updated subscription status
+      refreshUserData()
+    }
+  }, [searchParams, refreshUserData])
 
   const fetchPublishedContent = async () => {
     try {
