@@ -36,13 +36,14 @@ const CheckoutPage: React.FC = () => {
 
         // Always update subscription status to active after successful payment
         console.log('Updating subscription status to active for user:', user.id)
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('users')
           .update({
             subscription_status: 'active',
             updated_at: new Date().toISOString()
           })
           .eq('id', user.id)
+          .select()
 
         if (error) {
           console.error('Error updating subscription status:', error)
@@ -51,7 +52,7 @@ const CheckoutPage: React.FC = () => {
           return
         }
 
-        console.log('Subscription status updated successfully')
+        console.log('Subscription status updated successfully:', data)
 
         setStatus('success')
         setMessage('Payment successful! Redirecting to your dashboard...')

@@ -34,11 +34,21 @@ export default async function handler(req, res) {
   let event
 
   try {
-    // Get raw body for signature verification
-    const body = req.body
-    console.log('Raw body length:', body ? body.length : 'undefined')
+    // For Vercel, we need to handle the body properly
+    let body = req.body
     
-    event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
+    // Convert to string if it's an object
+    if (typeof body === 'object' && body !== null) {
+      body = JSON.stringify(body)
+    }
+    
+    // Convert to buffer for signature verification
+    const rawBody = Buffer.from(body, 'utf8')
+    
+    console.log('Raw body length:', rawBody.length)
+    console.log('Body type:', typeof body)
+    
+    event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret)
     console.log('Event verified successfully:', event.type, event.id)
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message)
