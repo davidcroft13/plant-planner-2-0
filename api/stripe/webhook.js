@@ -8,17 +8,20 @@ const supabase = createClient(
 )
 
 export default async function handler(req, res) {
-  console.log('Webhook received:', { method: req.method, headers: req.headers })
+  console.log('=== WEBHOOK FUNCTION CALLED ===')
+  console.log('Method:', req.method)
+  console.log('Headers:', JSON.stringify(req.headers, null, 2))
+  console.log('Body type:', typeof req.body)
+  console.log('Body:', JSON.stringify(req.body, null, 2))
+  console.log('URL:', req.url)
+  console.log('Query:', req.query)
   
   if (req.method !== 'POST') {
     console.log('Method not allowed:', req.method)
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  // For now, let's skip signature verification to test if the function works
-  // We'll add it back once we confirm the basic functionality
   console.log('Processing webhook without signature verification for testing')
-  console.log('Request body:', req.body)
   
   const event = req.body
 
