@@ -19,55 +19,56 @@ export default async function handler(req, res) {
   console.log('URL:', req.url)
   console.log('Query:', req.query)
   
-  if (req.method !== 'GET') {
+  if (req.method !== 'POST') {
     console.log('Method not allowed:', req.method)
-    console.log('Expected GET, got:', req.method)
+    console.log('Expected POST, got:', req.method)
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
   console.log('Processing webhook without signature verification for testing')
   
-  // For GET requests, we'll simulate a successful webhook event
-  // In a real implementation, you'd get the event data from query parameters or headers
-  const mockEvent = {
-    type: 'checkout.session.completed',
-    id: 'evt_test_' + Date.now(),
-    data: {
-      object: {
-        id: 'cs_test_' + Date.now(),
-        customer: 'cus_test_' + Date.now(),
-        metadata: {
-          userId: 'test_user_' + Date.now()
-        },
-        payment_status: 'paid'
-      }
-    }
-  }
+  const event = req.body
 
   try {
-    console.log('Processing mock event:', mockEvent.type, mockEvent.id)
+    console.log('Processing event:', event.type, event.id)
     
-    // For testing, let's just update a test user to active
-    console.log('Updating test user subscription to active')
-    
-    const { data, error } = await supabase
-      .from('users')
-      .update({
-        subscription_status: 'active',
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', mockEvent.data.object.metadata.userId)
-      .select()
+    switch (event.type) {
+      case 'checkout.session.completed':
+        console.log('Handling checkout.session.completed')
+        await handleCheckoutSessionCompleted(event.data.object)
+        break
 
-    if (error) {
-      console.error('Error updating user subscription:', error)
-      return res.status(500).json({ error: 'Failed to update subscription' })
-    } else {
-      console.log('Test user subscription activated successfully:', data)
+      case 'customer.subscription.updated':
+        console.log('Handling customer.subscription.updated')
+        await handleSubscriptionUpdated(event.data.object)
+        break
+
+      case 'customer.subscription.deleted':
+        console.log('Handling customer.subscription.deleted')
+        await handleSubscriptionDeleted(event.data.object)
+        break
+
+      case 'invoice.payment_succeeded':
+        console.log('Handling invoice.payment_succeeded')
+        await handlePaymentSucceeded(event.data.object)
+        break
+
+      case 'invoice.payment_failed':
+        console.log('Handling invoice.payment_failed')
+        await handlePaymentFailed(event.data.object)
+        break
+
+      case 'customer.created':
+        console.log('Handling customer.created')
+        await handleCustomerCreated(event.data.object)
+        break
+
+      default:
+        console.log(`Unhandled event type: ${event.type}`)
     }
 
-    console.log('Mock event processed successfully:', mockEvent.type)
-    res.status(200).json({ received: true, eventType: mockEvent.type, message: 'Test webhook processed' })
+    console.log('Event processed successfully:', event.type)
+    res.status(200).json({ received: true, eventType: event.type })
   } catch (error) {
     console.error('Webhook handler error:', error)
     console.error('Error stack:', error.stack)
