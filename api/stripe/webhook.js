@@ -10,6 +10,9 @@ const supabase = createClient(
 export default async function handler(req, res) {
   console.log('=== WEBHOOK FUNCTION CALLED ===')
   console.log('Method:', req.method)
+  console.log('Method type:', typeof req.method)
+  console.log('Method === "POST":', req.method === 'POST')
+  console.log('Method === POST:', req.method === 'POST')
   console.log('Headers:', JSON.stringify(req.headers, null, 2))
   console.log('Body type:', typeof req.body)
   console.log('Body:', JSON.stringify(req.body, null, 2))
@@ -18,6 +21,7 @@ export default async function handler(req, res) {
   
   if (req.method !== 'POST') {
     console.log('Method not allowed:', req.method)
+    console.log('Expected POST, got:', req.method)
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
