@@ -90,7 +90,7 @@ const HomePage: React.FC = () => {
       
       // Test Supabase connection first
       console.log('Testing Supabase connection...')
-      const { data: testData, error: testError } = await supabase
+      const { error: testError } = await supabase
         .from('recipes')
         .select('count')
         .limit(1)

@@ -194,11 +194,11 @@ const PostManagement: React.FC = () => {
       console.log('Closing form...')
       setShowForm(false)
       console.log('Post form submitted successfully!')
-    } catch (error) {
+    } catch (error: any) {
       console.error('=== ERROR SAVING POST ===')
       console.error('Error details:', error)
-      console.error('Error message:', error.message)
-      console.error('Error code:', error.code)
+      console.error('Error message:', error?.message)
+      console.error('Error code:', error?.code)
     }
   }
 

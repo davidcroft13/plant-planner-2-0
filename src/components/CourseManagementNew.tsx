@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { createClient } from '@supabase/supabase-js'
-import { Plus, Search, Edit, Trash2, X, Upload, Calendar, Clock, Play } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, X, Upload, Calendar, Clock } from 'lucide-react'
 import ToggleSwitch from './ToggleSwitch'
 
 // Get environment variables
@@ -500,7 +500,7 @@ const CourseManagementNew: React.FC = () => {
                   </div>
 
                   <div className="space-y-4">
-                    {days.map((day, dayIndex) => (
+                    {days.map((day) => (
                       <div key={day.id} className="border border-gray-200 rounded-lg p-4">
                         <div className="flex justify-between items-center mb-3">
                           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -542,7 +542,7 @@ const CourseManagementNew: React.FC = () => {
                             </button>
                           </div>
 
-                          {day.items.map((item, itemIndex) => (
+                          {day.items.map((item) => (
                             <div key={item.id} className="flex space-x-2 items-center bg-gray-50 p-2 rounded">
                               <select
                                 value={item.type}
