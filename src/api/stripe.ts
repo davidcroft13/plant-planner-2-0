@@ -31,10 +31,17 @@ export const createCheckoutSession = async (data: CreateCheckoutSessionRequest):
     
     console.log('Creating checkout session with:', { data, baseUrl })
     
-    const response = await fetch(`${baseUrl}/api/stripe/create-checkout-session`, {
+    // Add cache-busting parameter to prevent caching issues
+    const timestamp = Date.now()
+    const url = `${baseUrl}/api/stripe/create-checkout-session?t=${timestamp}`
+    
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
       },
       body: JSON.stringify(data),
     })
@@ -76,10 +83,17 @@ export const createPortalSession = async (data: CreatePortalSessionRequest): Pro
       ? (import.meta as any).env.VITE_FRONTEND_URL || window.location.origin
       : 'http://localhost:3000'
     
-    const response = await fetch(`${baseUrl}/api/stripe/create-customer-portal-session`, {
+    // Add cache-busting parameter to prevent caching issues
+    const timestamp = Date.now()
+    const url = `${baseUrl}/api/stripe/create-customer-portal-session?t=${timestamp}`
+    
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
       },
       body: JSON.stringify(data),
     })

@@ -359,8 +359,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null)
       setSession(null)
       
-      // Get fresh session
-      const { data: { session: freshSession } } = await supabase.auth.getSession()
+      // Force a complete auth refresh by getting a fresh session
+      const { data: { session: freshSession }, error: sessionError } = await supabase.auth.getSession()
+      
+      if (sessionError) {
+        console.error('Error getting fresh session:', sessionError)
+        setLoading(false)
+        return
+      }
+      
       setSession(freshSession)
       setUser(freshSession?.user ?? null)
       
