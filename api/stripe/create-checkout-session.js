@@ -8,9 +8,13 @@ const supabase = createClient(
 )
 
 export default async function handler(req, res) {
-  console.log('Checkout session request:', { method: req.method, body: req.body })
+  console.log('=== CHECKOUT SESSION REQUEST ===')
+  console.log('Method:', req.method)
+  console.log('Body:', JSON.stringify(req.body, null, 2))
+  console.log('Headers:', JSON.stringify(req.headers, null, 2))
   
   if (req.method !== 'POST') {
+    console.log('Method not allowed:', req.method)
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
@@ -22,6 +26,13 @@ export default async function handler(req, res) {
       console.log('Missing parameters:', { userId: !!userId, priceId: !!priceId })
       return res.status(400).json({ error: 'Missing required parameters' })
     }
+
+    // Check environment variables
+    console.log('Environment check:', {
+      hasStripeKey: !!process.env.STRIPE_SECRET_KEY,
+      hasSupabaseUrl: !!process.env.SUPABASE_URL,
+      hasSupabaseKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+    })
 
     // Get user from Supabase
     console.log('Looking up user in Supabase...')
@@ -65,7 +76,22 @@ export default async function handler(req, res) {
     console.log('Stripe session created:', session.id)
     res.status(200).json({ sessionId: session.id })
   } catch (error) {
-    console.error('Error creating checkout session:', error)
-    res.status(500).json({ error: 'Internal server error' })
+    console.error('=== CHECKOUT SESSION ERROR ===')
+    console.error('Error type:', typeof error)
+    console.error('Error message:', error.message)
+    console.error('Error stack:', error.stack)
+    console.error('Full error:', JSON.stringify(error, null, 2))
+    
+    // Ensure we always return valid JSON
+    try {
+      res.status(500).json({ 
+        error: 'Internal server error', 
+        details: error.message,
+        type: typeof error
+      })
+    } catch (jsonError) {
+      console.error('Failed to send JSON response:', jsonError)
+      res.status(500).send('Internal server error')
+    }
   }
 }
