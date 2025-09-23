@@ -12,7 +12,7 @@ const LoginPage: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState('')
   const [searchParams] = useSearchParams()
   
-  const { signIn, resetPassword } = useAuth()
+  const { signIn, resetPassword, refreshUserData } = useAuth()
   const navigate = useNavigate()
 
   // Check for email verification success
@@ -20,8 +20,10 @@ const LoginPage: React.FC = () => {
     const verified = searchParams.get('verified')
     if (verified === 'true') {
       setSuccessMessage('Email verified successfully! You can now log in.')
+      // Refresh user data after email verification
+      refreshUserData()
     }
-  }, [searchParams])
+  }, [searchParams, refreshUserData])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

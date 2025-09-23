@@ -106,7 +106,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
+        console.log('Auth state change:', event, session?.user?.id)
         setSession(session)
         setUser(session?.user ?? null)
         
@@ -355,6 +356,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Clear cached data
       setUserProfile(null)
+      setUser(null)
+      setSession(null)
       
       // Get fresh session
       const { data: { session: freshSession } } = await supabase.auth.getSession()
