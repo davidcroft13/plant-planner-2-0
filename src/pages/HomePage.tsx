@@ -86,8 +86,10 @@ const HomePage: React.FC = () => {
   const fetchPublishedContent = async () => {
     try {
       setLoading(true)
+      console.log('Fetching published content...')
       
       // Fetch recipes
+      console.log('Fetching recipes...')
       const { data: recipes, error: recipesError } = await supabase
         .from('recipes')
         .select('*')
@@ -98,10 +100,12 @@ const HomePage: React.FC = () => {
       if (recipesError) {
         console.error('Error fetching recipes:', recipesError)
       } else {
+        console.log('Recipes fetched successfully:', recipes?.length || 0)
         setNewestRecipes(recipes || [])
       }
 
       // Fetch workouts
+      console.log('Fetching workouts...')
       const { data: workouts, error: workoutsError } = await supabase
         .from('workouts')
         .select('*')
@@ -112,10 +116,12 @@ const HomePage: React.FC = () => {
       if (workoutsError) {
         console.error('Error fetching workouts:', workoutsError)
       } else {
+        console.log('Workouts fetched successfully:', workouts?.length || 0)
         setRecentWorkouts(workouts || [])
       }
 
       // Fetch posts
+      console.log('Fetching posts...')
       const { data: posts, error: postsError } = await supabase
         .from('posts')
         .select('*')
@@ -126,11 +132,13 @@ const HomePage: React.FC = () => {
       if (postsError) {
         console.error('Error fetching posts:', postsError)
       } else {
+        console.log('Posts fetched successfully:', posts?.length || 0)
         setRecentPosts(posts || [])
       }
     } catch (error) {
       console.error('Error fetching content:', error)
     } finally {
+      console.log('Finished fetching content')
       setLoading(false)
     }
   }
