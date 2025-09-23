@@ -29,13 +29,17 @@ export const createCheckoutSession = async (data: CreateCheckoutSessionRequest):
       ? (import.meta as any).env.VITE_FRONTEND_URL || window.location.origin
       : 'http://localhost:3000'
     
-    console.log('Creating checkout session with:', { data, baseUrl })
+    console.log('=== CREATING CHECKOUT SESSION ===')
+    console.log('Data:', data)
+    console.log('Base URL:', baseUrl)
+    console.log('Is Production:', isProduction)
     
     // Add cache-busting parameter to prevent caching issues
     const timestamp = Date.now()
     const url = `${baseUrl}/api/stripe/create-checkout-session?t=${timestamp}`
+    console.log('Full URL:', url)
     
-    const response = await fetch(url, {
+    const requestOptions = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -44,33 +48,59 @@ export const createCheckoutSession = async (data: CreateCheckoutSessionRequest):
         'Expires': '0'
       },
       body: JSON.stringify(data),
-    })
+    }
+    
+    console.log('Request options:', requestOptions)
+    
+    const response = await fetch(url, requestOptions)
 
-    console.log('Stripe API response status:', response.status)
+    console.log('Response status:', response.status)
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()))
+    console.log('Response ok:', response.ok)
     
     // Read response as text first to handle both JSON and non-JSON responses
     const responseText = await response.text()
-    console.log('Raw response:', responseText)
+    console.log('Raw response text length:', responseText.length)
+    console.log('Raw response text:', responseText)
+    
+    // Check if response is empty
+    if (!responseText || responseText.trim() === '') {
+      console.error('Empty response received')
+      return { error: 'Server returned empty response' }
+    }
     
     let result
     try {
       result = JSON.parse(responseText)
-      console.log('Stripe API response:', result)
+      console.log('Parsed JSON result:', result)
     } catch (jsonError) {
       console.error('JSON parsing error:', jsonError)
-      return { error: `Server returned invalid JSON: ${responseText.substring(0, 100)}...` }
+      console.error('Response that failed to parse:', responseText)
+      return { 
+        error: `Server returned invalid JSON. Status: ${response.status}. Response: ${responseText.substring(0, 200)}...` 
+      }
     }
 
     if (!response.ok) {
-      console.error('Stripe API error response:', result)
-      return { error: result.error || 'Failed to create checkout session' }
+      console.error('HTTP error response:', result)
+      return { error: result.error || `HTTP ${response.status}: Failed to create checkout session` }
     }
 
+    if (!result.sessionId) {
+      console.error('No sessionId in response:', result)
+      return { error: 'No session ID returned from server' }
+    }
+
+    console.log('Success! Session ID:', result.sessionId)
     return { sessionId: result.sessionId }
-  } catch (error) {
-    console.error('Stripe API error:', error)
+  } catch (error: any) {
+    console.error('=== STRIPE API ERROR ===')
+    console.error('Error type:', typeof error)
+    console.error('Error message:', error?.message)
+    console.error('Error stack:', error?.stack)
+    console.error('Full error:', error)
     return {
-      error: `Failed to create checkout session: ${error}`
+      error: `Network error: ${error?.message || 'Unknown error'}`
     }
   }
 }

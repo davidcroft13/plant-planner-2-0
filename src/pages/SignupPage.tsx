@@ -103,7 +103,7 @@ const SignupPage: React.FC = () => {
       // Wait a moment for user profile to be created
       await new Promise(resolve => setTimeout(resolve, 2000))
 
-      const { error, sessionId } = await createCheckoutSession(priceId, user.id)
+      const { error, sessionId } = await createCheckoutSession({ priceId, userId: user.id })
       
       if (error) {
         if (error.message?.includes('Backend server not running')) {

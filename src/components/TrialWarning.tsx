@@ -18,7 +18,7 @@ const TrialWarning: React.FC = () => {
       return
     }
 
-    const { error, sessionId } = await createCheckoutSession(priceId, userProfile.id)
+    const { error, sessionId } = await createCheckoutSession({ priceId, userId: userProfile.id })
     
     if (error) {
       alert('Failed to create checkout session. Please try again.')

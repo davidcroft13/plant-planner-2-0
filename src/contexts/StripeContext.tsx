@@ -5,8 +5,8 @@ import { createCheckoutSession, createPortalSession, getSubscriptionStatus } fro
 interface StripeContextType {
   stripe: Promise<Stripe | null> | null
   loading: boolean
-  createCheckoutSession: (priceId: string, userId: string) => Promise<{ error?: any; sessionId?: string }>
-  createCustomerPortalSession: (customerId: string) => Promise<{ error?: any; url?: string }>
+  createCheckoutSession: (data: { priceId: string; userId: string }) => Promise<{ error?: any; sessionId?: string }>
+  createCustomerPortalSession: (data: { customerId: string }) => Promise<{ error?: any; url?: string }>
   getSubscriptionStatus: (customerId: string) => Promise<{ error?: any; status?: string }>
 }
 
@@ -32,14 +32,14 @@ export const useStripeContext = () => {
 export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [loading, setLoading] = useState(false)
 
-  const handleCreateCheckoutSession = async (priceId: string, userId: string) => {
+  const handleCreateCheckoutSession = async (data: { priceId: string; userId: string }) => {
     if (!stripePublishableKey) {
       return { error: new Error('Stripe not configured') }
     }
 
     setLoading(true)
     try {
-      const result = await createCheckoutSession({ priceId, userId })
+      const result = await createCheckoutSession(data)
       return result
     } catch (error) {
       return { error }
@@ -48,14 +48,14 @@ export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }
 
-  const handleCreateCustomerPortalSession = async (customerId: string) => {
+  const handleCreateCustomerPortalSession = async (data: { customerId: string }) => {
     if (!stripePublishableKey) {
       return { error: new Error('Stripe not configured') }
     }
 
     setLoading(true)
     try {
-      const result = await createPortalSession({ customerId })
+      const result = await createPortalSession(data)
       return result
     } catch (error) {
       return { error }

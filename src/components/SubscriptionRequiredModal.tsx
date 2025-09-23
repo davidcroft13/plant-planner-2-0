@@ -28,7 +28,7 @@ const SubscriptionRequiredModal: React.FC<SubscriptionRequiredModalProps> = ({ i
     setError('')
 
     try {
-      const { error, sessionId } = await createCheckoutSession(priceId, userProfile.id)
+      const { error, sessionId } = await createCheckoutSession({ priceId, userId: userProfile.id })
       
       if (error) {
         setError(error || 'Failed to create checkout session. Please try again.')

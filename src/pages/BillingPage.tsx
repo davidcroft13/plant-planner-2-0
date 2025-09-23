@@ -80,7 +80,7 @@ const BillingPage: React.FC = () => {
   const handleUpgradePlan = async (priceId?: string) => {
     setLoading(true)
     try {
-      const { error } = await createCheckoutSession(user?.id || '', priceId || 'monthly')
+      const { error } = await createCheckoutSession({ userId: user?.id || '', priceId: priceId || 'monthly' })
       if (error) {
         alert('Error creating checkout session. Please try again.')
         return
@@ -101,7 +101,7 @@ const BillingPage: React.FC = () => {
     
     setLoading(true)
     try {
-      const { error } = await createCustomerPortalSession(billingInfo.stripe_customer_id)
+      const { error } = await createCustomerPortalSession({ customerId: billingInfo.stripe_customer_id })
       if (error) {
         alert('Error opening billing portal. Please try again.')
         return
