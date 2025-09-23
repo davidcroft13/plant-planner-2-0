@@ -219,9 +219,14 @@ const HomePage: React.FC = () => {
   return (
     <div className="px-4 py-6">
       {/* Recent Posts Section */}
-      <section className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Recent Posts</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <section className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold text-gray-900">Recent Posts</h2>
+          <Link to="/app/posts" className="text-primary-600 hover:text-primary-700 font-medium text-lg">
+            See All
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
           {loading ? (
             <div className="col-span-full text-center py-8 text-gray-600">Loading posts...</div>
           ) : recentPosts.length === 0 ? (
@@ -230,26 +235,44 @@ const HomePage: React.FC = () => {
             recentPosts.map((post) => (
               <div 
                 key={post.id} 
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
                 onClick={() => setSelectedPost(post)}
               >
                 <div className="relative">
                   <img 
                     src={post.image_url || 'https://via.placeholder.com/300x200'} 
                     alt={post.title}
-                    className="w-full h-48 object-cover"
+                    className="w-full h-32 object-cover"
                   />
-                  <div className="absolute top-3 left-3">
+                  <div className="absolute top-4 right-4 flex space-x-2">
+                    <button className="bg-white bg-opacity-90 text-gray-700 rounded-full p-2 hover:bg-opacity-100 shadow-md">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                      </svg>
+                    </button>
+                    <button className="bg-white bg-opacity-90 text-gray-700 rounded-full p-2 hover:bg-opacity-100 shadow-md">
+                      <Heart className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="absolute bottom-4 left-4">
                     {post.category && (
-                      <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                      <span className="px-3 py-1 bg-white bg-opacity-90 text-gray-800 text-sm font-medium rounded-full">
                         {post.category}
                       </span>
                     )}
                   </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{post.title}</h3>
-                  <p className="text-sm text-gray-600 line-clamp-2">{post.description}</p>
+                <div className="p-3">
+                  <h3 className="text-sm font-bold text-gray-900 mb-1 line-clamp-1">{post.title}</h3>
+                  <p className="text-gray-600 mb-2 line-clamp-2 text-xs">{post.description}</p>
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span className="px-2 py-1 bg-gray-100 rounded-full">
+                      {post.category || 'Post'}
+                    </span>
+                    <span className="px-2 py-1 bg-gray-100 rounded-full">
+                      Article
+                    </span>
+                  </div>
                 </div>
               </div>
             ))
