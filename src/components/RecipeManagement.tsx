@@ -254,6 +254,22 @@ const RecipeManagement: React.FC = () => {
     }
   }
 
+  const handleTogglePublish = async (recipe: Recipe) => {
+    try {
+      const { error } = await supabase
+        .from('recipes')
+        .update({ 
+          is_published: !recipe.is_published,
+          published_at: !recipe.is_published ? new Date().toISOString() : null
+        })
+        .eq('id', recipe.id)
+      if (error) throw error
+      await fetchRecipes()
+    } catch (error) {
+      console.error('Error updating publish status:', error)
+    }
+  }
+
   const handleDeleteRecipe = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this recipe?')) return
     
@@ -657,21 +673,27 @@ const RecipeManagement: React.FC = () => {
                 )}
                 
                 {/* Action Buttons */}
-                <div className="flex justify-end items-center space-x-2">
-                  <button
-                    onClick={() => handleEditRecipe(recipe)}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center space-x-1"
-                  >
-                    <Edit className="w-4 h-4" />
-                    <span>Edit</span>
-                  </button>
-                  <button
-                    onClick={() => handleDeleteRecipe(recipe.id)}
-                    className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center space-x-1"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    <span>Delete</span>
-                  </button>
+                <div className="flex justify-between items-center">
+                  <ToggleSwitch
+                    checked={recipe.is_published}
+                    onChange={() => handleTogglePublish(recipe)}
+                  />
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handleEditRecipe(recipe)}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center space-x-1"
+                    >
+                      <Edit className="w-4 h-4" />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteRecipe(recipe.id)}
+                      className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center space-x-1"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
