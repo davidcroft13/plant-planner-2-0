@@ -116,7 +116,10 @@ const PostManagement: React.FC = () => {
       return
     }
 
-    console.log('Submitting post form...', formData)
+    console.log('=== SUBMITTING POST FORM ===')
+    console.log('Form data:', formData)
+    console.log('User:', user.id)
+    console.log('Image file:', imageFile)
 
     try {
       // Handle image upload if there's a file
@@ -154,22 +157,39 @@ const PostManagement: React.FC = () => {
       }
 
       if (editingPost) {
+        console.log('Updating existing post:', editingPost.id)
         const { error } = await supabase
           .from('posts')
           .update(postData)
           .eq('id', editingPost.id)
-        if (error) throw error
+        if (error) {
+          console.error('Error updating post:', error)
+          throw error
+        }
+        console.log('Post updated successfully')
       } else {
-        const { error } = await supabase
+        console.log('Creating new post with data:', postData)
+        const { data, error } = await supabase
           .from('posts')
           .insert([postData])
-        if (error) throw error
+          .select()
+        if (error) {
+          console.error('Error creating post:', error)
+          throw error
+        }
+        console.log('Post created successfully:', data)
       }
 
+      console.log('Refreshing posts list...')
       await fetchPosts()
+      console.log('Closing form...')
       setShowForm(false)
+      console.log('Post form submitted successfully!')
     } catch (error) {
-      console.error('Error saving post:', error)
+      console.error('=== ERROR SAVING POST ===')
+      console.error('Error details:', error)
+      console.error('Error message:', error.message)
+      console.error('Error code:', error.code)
     }
   }
 
