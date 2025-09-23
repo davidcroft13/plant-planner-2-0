@@ -144,17 +144,25 @@ const PostManagement: React.FC = () => {
         }
       }
 
+      // Process tags properly
+      const processedTags = formData.tags 
+        ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+        : []
+
       const postData = {
         title: formData.title,
         description: formData.description,
         content: formData.content,
         category: formData.category,
-        tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+        tags: processedTags,
         image_url: imageUrl,
         is_published: formData.is_published,
         published_at: formData.is_published ? new Date().toISOString() : null,
         created_by: user.id
       }
+
+      console.log('Processed tags:', processedTags)
+      console.log('Final post data:', postData)
 
       if (editingPost) {
         console.log('Updating existing post:', editingPost.id)
