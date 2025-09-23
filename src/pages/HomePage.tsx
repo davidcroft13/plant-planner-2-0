@@ -86,10 +86,34 @@ const HomePage: React.FC = () => {
   const fetchPublishedContent = async () => {
     try {
       setLoading(true)
-      console.log('Fetching published content...')
+      console.log('=== FETCHING PUBLISHED CONTENT ===')
       
-      // Fetch recipes
-      console.log('Fetching recipes...')
+      // Test Supabase connection first
+      console.log('Testing Supabase connection...')
+      const { data: testData, error: testError } = await supabase
+        .from('recipes')
+        .select('count')
+        .limit(1)
+      
+      if (testError) {
+        console.error('Supabase connection error:', testError)
+        return
+      }
+      console.log('Supabase connection successful')
+      
+      // Fetch ALL recipes first (not just published) to see what we have
+      console.log('Fetching ALL recipes...')
+      const { data: allRecipes, error: allRecipesError } = await supabase
+        .from('recipes')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10)
+      
+      console.log('All recipes:', allRecipes?.length || 0, allRecipes)
+      console.log('All recipes error:', allRecipesError)
+      
+      // Now fetch published recipes
+      console.log('Fetching published recipes...')
       const { data: recipes, error: recipesError } = await supabase
         .from('recipes')
         .select('*')
@@ -100,12 +124,23 @@ const HomePage: React.FC = () => {
       if (recipesError) {
         console.error('Error fetching recipes:', recipesError)
       } else {
-        console.log('Recipes fetched successfully:', recipes?.length || 0)
+        console.log('Published recipes fetched successfully:', recipes?.length || 0, recipes)
         setNewestRecipes(recipes || [])
       }
 
-      // Fetch workouts
-      console.log('Fetching workouts...')
+      // Fetch ALL workouts first
+      console.log('Fetching ALL workouts...')
+      const { data: allWorkouts, error: allWorkoutsError } = await supabase
+        .from('workouts')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10)
+      
+      console.log('All workouts:', allWorkouts?.length || 0, allWorkouts)
+      console.log('All workouts error:', allWorkoutsError)
+
+      // Now fetch published workouts
+      console.log('Fetching published workouts...')
       const { data: workouts, error: workoutsError } = await supabase
         .from('workouts')
         .select('*')
@@ -116,12 +151,23 @@ const HomePage: React.FC = () => {
       if (workoutsError) {
         console.error('Error fetching workouts:', workoutsError)
       } else {
-        console.log('Workouts fetched successfully:', workouts?.length || 0)
+        console.log('Published workouts fetched successfully:', workouts?.length || 0, workouts)
         setRecentWorkouts(workouts || [])
       }
 
-      // Fetch posts
-      console.log('Fetching posts...')
+      // Fetch ALL posts first
+      console.log('Fetching ALL posts...')
+      const { data: allPosts, error: allPostsError } = await supabase
+        .from('posts')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10)
+      
+      console.log('All posts:', allPosts?.length || 0, allPosts)
+      console.log('All posts error:', allPostsError)
+
+      // Now fetch published posts
+      console.log('Fetching published posts...')
       const { data: posts, error: postsError } = await supabase
         .from('posts')
         .select('*')
@@ -132,7 +178,7 @@ const HomePage: React.FC = () => {
       if (postsError) {
         console.error('Error fetching posts:', postsError)
       } else {
-        console.log('Posts fetched successfully:', posts?.length || 0)
+        console.log('Published posts fetched successfully:', posts?.length || 0, posts)
         setRecentPosts(posts || [])
       }
     } catch (error) {
