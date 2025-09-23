@@ -21,8 +21,13 @@ UPDATE posts SET
   is_published = false
 WHERE category IS NULL;
 
--- Create RLS policies for posts
-CREATE POLICY IF NOT EXISTS "Users can view all posts" ON posts FOR SELECT USING (true);
-CREATE POLICY IF NOT EXISTS "Users can insert their own posts" ON posts FOR INSERT WITH CHECK (auth.uid() = created_by);
-CREATE POLICY IF NOT EXISTS "Users can update their own posts" ON posts FOR UPDATE USING (auth.uid() = created_by);
-CREATE POLICY IF NOT EXISTS "Users can delete their own posts" ON posts FOR DELETE USING (auth.uid() = created_by);
+-- Create RLS policies for posts (drop existing first to avoid conflicts)
+DROP POLICY IF EXISTS "Users can view all posts" ON posts;
+DROP POLICY IF EXISTS "Users can insert their own posts" ON posts;
+DROP POLICY IF EXISTS "Users can update their own posts" ON posts;
+DROP POLICY IF EXISTS "Users can delete their own posts" ON posts;
+
+CREATE POLICY "Users can view all posts" ON posts FOR SELECT USING (true);
+CREATE POLICY "Users can insert their own posts" ON posts FOR INSERT WITH CHECK (auth.uid() = created_by);
+CREATE POLICY "Users can update their own posts" ON posts FOR UPDATE USING (auth.uid() = created_by);
+CREATE POLICY "Users can delete their own posts" ON posts FOR DELETE USING (auth.uid() = created_by);
