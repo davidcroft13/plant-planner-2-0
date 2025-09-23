@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { createClient } from '@supabase/supabase-js'
 import RecipeManagement from '../components/RecipeManagement'
 import WorkoutManagement from '../components/WorkoutManagement'
-import CourseManagement from '../components/CourseManagement'
+import CourseManagementNew from '../components/CourseManagementNew'
 import PostManagement from '../components/PostManagement'
 import SettingsManagement from '../components/SettingsManagement'
 
@@ -312,7 +312,7 @@ const CreatorPortal: React.FC = () => {
 
                {activeTab === 'workouts' && <WorkoutManagement />}
 
-               {activeTab === 'courses' && <CourseManagement />}
+               {activeTab === 'courses' && <CourseManagementNew />}
 
           {activeTab === 'posts' && <PostManagement />}
 

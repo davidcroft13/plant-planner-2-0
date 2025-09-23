@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { createClient } from '@supabase/supabase-js'
 import { Plus, Search, Filter, Clock, Edit, Trash2, X, Upload } from 'lucide-react'
+import ToggleSwitch from './ToggleSwitch'
 
 // Get environment variables
 const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL
@@ -333,16 +334,10 @@ const PostManagement: React.FC = () => {
                   </span>
                 </div>
                 
-                <button
-                  onClick={() => handleTogglePublish(post)}
-                  className={`px-3 py-1 rounded text-sm font-medium ${
-                    post.is_published
-                      ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-                      : 'bg-green-100 text-green-800 hover:bg-green-200'
-                  }`}
-                >
-                  {post.is_published ? 'Unpublish' : 'Publish'}
-                </button>
+                <ToggleSwitch
+                  checked={post.is_published}
+                  onChange={() => handleTogglePublish(post)}
+                />
               </div>
             </div>
           </div>
@@ -492,18 +487,11 @@ const PostManagement: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="is_published"
-                    checked={formData.is_published}
-                    onChange={(e) => setFormData({...formData, is_published: e.target.checked})}
-                    className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                  />
-                  <label htmlFor="is_published" className="ml-2 text-sm text-gray-700">
-                    Publish this post
-                  </label>
-                </div>
+                <ToggleSwitch
+                  checked={formData.is_published}
+                  onChange={(checked) => setFormData({...formData, is_published: checked})}
+                  label="Publish this post"
+                />
 
                 <div className="flex justify-end space-x-4 pt-4">
                   <button
