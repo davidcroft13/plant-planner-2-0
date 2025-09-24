@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { createClient } from '@supabase/supabase-js'
+import supabase from '../utils/supabase'
 import { Plus, Search, Filter, Clock, Edit, Trash2, X, Upload } from 'lucide-react'
 import ToggleSwitch from './ToggleSwitch'
-
-// Get environment variables
-const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL
-const supabaseKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY
-const supabase = createClient(supabaseUrl, supabaseKey)
+import { clearAllCache } from '../utils/cache'
 
 interface Post {
   id: string
@@ -193,6 +189,8 @@ const PostManagement: React.FC = () => {
       await fetchPosts()
       console.log('Closing form...')
       setShowForm(false)
+      // Clear cache to ensure fresh data
+      clearAllCache()
       console.log('Post form submitted successfully!')
     } catch (error: any) {
       console.error('=== ERROR SAVING POST ===')

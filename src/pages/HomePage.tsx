@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Clock, Heart, Users } from 'lucide-react'
-import { createClient } from '@supabase/supabase-js'
+import supabase from '../utils/supabase'
 import { useAuth } from '../contexts/AuthContext'
-
-// Get environment variables
-const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL
-const supabaseKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY
-const supabase = createClient(supabaseUrl, supabaseKey)
 
 interface Recipe {
   id: string

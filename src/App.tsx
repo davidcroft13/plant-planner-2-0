@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/AuthContext'
 import { StripeProvider } from './contexts/StripeContext'
 import Layout from './components/Layout'
+import CacheManager from './components/CacheManager'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
@@ -20,11 +21,12 @@ import CheckoutPage from './pages/CheckoutPage'
 
 function App() {
   return (
-    <StripeProvider>
-      <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-white">
-            <Routes>
+        <StripeProvider>
+          <AuthProvider>
+            <Router>
+              <div className="min-h-screen bg-white">
+                <CacheManager />
+                <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />

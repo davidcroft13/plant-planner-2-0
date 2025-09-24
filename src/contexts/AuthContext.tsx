@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { createClient, User, Session } from '@supabase/supabase-js'
+import { User, Session } from '@supabase/supabase-js'
+import supabase from '../utils/supabase'
 
 interface UserProfile {
   id: string
@@ -34,16 +35,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Get environment variables
-const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL
-const supabaseKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY
-
-// Validate environment variables
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase environment variables. Please check your .env.local file.')
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey)
+// Supabase client is now imported from utils/supabase.ts with cache-busting
 
 export const useAuth = () => {
   const context = useContext(AuthContext)
@@ -354,10 +346,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('Refreshing user data...')
       setLoading(true)
       
-      // Clear cached data
+      // Clear all cached data
       setUserProfile(null)
       setUser(null)
       setSession(null)
+      
+      // Clear any cached data in localStorage/sessionStorage
+      localStorage.removeItem('supabase.auth.token')
+      sessionStorage.clear()
       
       // Force a complete auth refresh by getting a fresh session
       const { data: { session: freshSession }, error: sessionError } = await supabase.auth.getSession()
@@ -372,7 +368,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(freshSession?.user ?? null)
       
       if (freshSession?.user) {
-        // Fetch fresh user profile
+        // Fetch fresh user profile with cache busting
         await fetchUserProfile(freshSession.user.id)
       }
       

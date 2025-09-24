@@ -45,7 +45,9 @@ export const createCheckoutSession = async (data: CreateCheckoutSessionRequest):
         'Content-Type': 'application/json',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
-        'Expires': '0'
+        'Expires': '0',
+        'X-Cache-Bust': Date.now().toString(),
+        'X-Request-ID': Math.random().toString(36).substring(7)
       },
       body: JSON.stringify(data),
     }
