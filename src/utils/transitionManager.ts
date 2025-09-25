@@ -25,25 +25,23 @@ export class TransitionManager {
     this.transitionInProgress = true
     
     try {
-      // Clear all cache
-      clearAllCache()
-      
-      // Validate auth state
+      // Only clear cache if needed, don't force refresh
       const isValid = await authManager.validateAuth()
       
       if (!isValid) {
-        console.log('❌ Auth validation failed, forcing refresh')
-        forceRefresh()
+        console.log('❌ Auth validation failed, clearing cache only')
+        clearAllCache()
         return
       }
       
       // Wait a moment for state to settle
-      await new Promise(resolve => setTimeout(resolve, 500))
+      await new Promise(resolve => setTimeout(resolve, 200))
       
       console.log('✅ Signup to payment transition complete')
     } catch (error) {
       console.error('❌ Signup to payment transition failed:', error)
-      forceRefresh()
+      // Don't force refresh, just clear cache
+      clearAllCache()
     } finally {
       this.transitionInProgress = false
     }
@@ -97,25 +95,23 @@ export class TransitionManager {
     this.transitionInProgress = true
     
     try {
-      // Clear all cache
-      clearAllCache()
-      
-      // Validate auth state
+      // Only validate auth state, don't clear cache during login
       const isValid = await authManager.validateAuth()
       
       if (!isValid) {
-        console.log('❌ Auth validation failed, forcing refresh')
-        forceRefresh()
+        console.log('❌ Auth validation failed, clearing cache only')
+        clearAllCache()
         return
       }
       
       // Wait for state to settle
-      await new Promise(resolve => setTimeout(resolve, 500))
+      await new Promise(resolve => setTimeout(resolve, 200))
       
       console.log('✅ Login transition complete')
     } catch (error) {
       console.error('❌ Login transition failed:', error)
-      forceRefresh()
+      // Don't force refresh, just clear cache
+      clearAllCache()
     } finally {
       this.transitionInProgress = false
     }

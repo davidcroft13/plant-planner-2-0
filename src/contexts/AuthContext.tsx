@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import supabase from '../utils/supabase'
 import { authManager } from '../utils/authManager'
-import { clearAllCache, forceRefresh } from '../utils/cache'
+import { clearAllCache } from '../utils/cache'
 
 interface UserProfile {
   id: string
@@ -352,8 +352,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const isValid = await authManager.validateAuth()
       
       if (!isValid) {
-        console.log('❌ Auth validation failed, forcing refresh')
-        forceRefresh()
+        console.log('❌ Auth validation failed, clearing cache only')
+        clearAllCache()
         return
       }
       
@@ -362,7 +362,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null)
       setSession(null)
       
-      // Nuclear cache clear
+      // Only clear cache if really needed
       clearAllCache()
       
       // Force a complete auth refresh by getting a fresh session
@@ -371,8 +371,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (sessionError) {
         console.error('❌ Error getting fresh session:', sessionError)
         setLoading(false)
-        // Try one more time with force refresh
-        setTimeout(() => forceRefresh(), 1000)
+        // Don't force refresh, just clear cache
+        clearAllCache()
         return
       }
       
@@ -387,8 +387,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('✅ User data refreshed successfully')
     } catch (error) {
       console.error('❌ Error refreshing user data:', error)
-      // Force refresh on any error
-      setTimeout(() => forceRefresh(), 1000)
+      // Don't force refresh, just clear cache
+      clearAllCache()
     } finally {
       setLoading(false)
     }

@@ -20,10 +20,7 @@ export class AuthManager {
     console.log('🔄 Force refreshing auth state...')
     
     try {
-      // Clear all cached data first
-      clearAllCache()
-      
-      // Force a completely fresh session check
+      // Don't clear cache during auth refresh, just validate
       const { data: { session }, error } = await supabase.auth.getSession()
       
       if (error) {
