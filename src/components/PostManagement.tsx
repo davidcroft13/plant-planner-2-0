@@ -3,7 +3,6 @@ import { useAuth } from '../contexts/AuthContext'
 import supabase from '../utils/supabase'
 import { Plus, Search, Filter, Clock, Edit, Trash2, X, Upload } from 'lucide-react'
 import ToggleSwitch from './ToggleSwitch'
-import { clearAllCache } from '../utils/cache'
 
 interface Post {
   id: string
@@ -189,8 +188,6 @@ const PostManagement: React.FC = () => {
       await fetchPosts()
       console.log('Closing form...')
       setShowForm(false)
-      // Clear cache to ensure fresh data
-      clearAllCache()
       console.log('Post form submitted successfully!')
     } catch (error: any) {
       console.error('=== ERROR SAVING POST ===')

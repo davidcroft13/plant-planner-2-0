@@ -4,6 +4,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { StripeProvider } from './contexts/StripeContext'
 import Layout from './components/Layout'
 import CacheManager from './components/CacheManager'
+import './utils/userActivityDetector' // Initialize user activity detection
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'

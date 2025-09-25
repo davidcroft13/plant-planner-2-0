@@ -362,17 +362,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null)
       setSession(null)
       
-      // Only clear cache if really needed
-      clearAllCache()
-      
       // Force a complete auth refresh by getting a fresh session
       const { data: { session: freshSession }, error: sessionError } = await supabase.auth.getSession()
       
       if (sessionError) {
         console.error('❌ Error getting fresh session:', sessionError)
         setLoading(false)
-        // Don't force refresh, just clear cache
-        clearAllCache()
         return
       }
       
@@ -387,8 +382,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('✅ User data refreshed successfully')
     } catch (error) {
       console.error('❌ Error refreshing user data:', error)
-      // Don't force refresh, just clear cache
-      clearAllCache()
     } finally {
       setLoading(false)
     }

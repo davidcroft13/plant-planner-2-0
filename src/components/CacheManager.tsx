@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { debouncedCacheManager } from '../utils/debouncedCache'
 import { authManager } from '../utils/authManager'
 
-// Component that intelligently manages cache on route changes
+// Component that very conservatively manages cache on route changes
 const CacheManager: React.FC = () => {
   const location = useLocation()
   const lastPathRef = useRef<string>('')
@@ -13,27 +13,25 @@ const CacheManager: React.FC = () => {
     const path = location.pathname
     const now = Date.now()
     
-    // Only clear cache if we've actually changed routes and enough time has passed
-    if (path !== lastPathRef.current && now - lastClearTimeRef.current > 2000) {
-      console.log('🔄 Route change detected, clearing cache for:', path)
+    // Only clear cache for very specific critical transitions
+    if (path !== lastPathRef.current && now - lastClearTimeRef.current > 10000) { // 10 seconds minimum
+      console.log('🔄 Route change detected:', path)
       
-      // Only clear cache for major section changes, not within the same section
-      const isMajorSectionChange = (
-        (lastPathRef.current.includes('/app') && !path.includes('/app')) ||
-        (lastPathRef.current.includes('/creator') && !path.includes('/creator')) ||
-        (lastPathRef.current.includes('/admin') && !path.includes('/admin')) ||
-        (lastPathRef.current.includes('/login') && !path.includes('/login')) ||
-        (lastPathRef.current.includes('/signup') && !path.includes('/signup')) ||
-        (lastPathRef.current.includes('/checkout') && !path.includes('/checkout')) ||
-        (!lastPathRef.current.includes('/app') && path.includes('/app')) ||
-        (!lastPathRef.current.includes('/creator') && path.includes('/creator')) ||
-        (!lastPathRef.current.includes('/admin') && path.includes('/admin')) ||
-        (!lastPathRef.current.includes('/login') && path.includes('/login')) ||
-        (!lastPathRef.current.includes('/signup') && path.includes('/signup')) ||
-        (!lastPathRef.current.includes('/checkout') && path.includes('/checkout'))
+      // Only clear cache for critical auth transitions, not browsing
+      const isCriticalAuthTransition = (
+        // Login/signup to app
+        (lastPathRef.current.includes('/login') && path.includes('/app')) ||
+        (lastPathRef.current.includes('/signup') && path.includes('/app')) ||
+        // Checkout to app (after payment)
+        (lastPathRef.current.includes('/checkout') && path.includes('/app')) ||
+        // App to creator (admin access)
+        (lastPathRef.current.includes('/app') && path.includes('/creator')) ||
+        // Logout transitions
+        (lastPathRef.current.includes('/app') && !path.includes('/app') && !path.includes('/creator'))
       )
       
-      if (isMajorSectionChange) {
+      if (isCriticalAuthTransition) {
+        console.log('🧹 Critical auth transition detected, clearing cache')
         debouncedCacheManager.debouncedClear()
         lastClearTimeRef.current = now
       }
@@ -41,13 +39,9 @@ const CacheManager: React.FC = () => {
       lastPathRef.current = path
     }
     
-    // Only validate auth state on critical routes, not on every change
-    if (
-      path.includes('/app') || 
-      path.includes('/creator') || 
-      path.includes('/admin')
-    ) {
-      console.log('🔐 Validating auth state for critical route:', path)
+    // Only validate auth state on initial app load, not on every change
+    if (path.includes('/app') && !lastPathRef.current.includes('/app')) {
+      console.log('🔐 Initial app load, validating auth state')
       authManager.validateAuth()
     }
   }, [location.pathname])
