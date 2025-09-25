@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Search, Filter, Plus, MoreVertical, Heart, Clock, Users } from 'lucide-react'
-import { createClient } from '@supabase/supabase-js'
-
-// Get environment variables
-const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL
-const supabaseKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY
-const supabase = createClient(supabaseUrl, supabaseKey)
+import supabase from '../utils/supabase'
 
 interface Recipe {
   id: string
@@ -34,6 +29,7 @@ const RecipesPage: React.FC = () => {
 
   const fetchPublishedRecipes = async () => {
     try {
+      console.log('🔄 Fetching published recipes...')
       setLoading(true)
       const { data, error } = await supabase
         .from('recipes')
@@ -42,12 +38,13 @@ const RecipesPage: React.FC = () => {
         .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('Error fetching recipes:', error)
+        console.error('❌ Error fetching recipes:', error)
       } else {
+        console.log('✅ Recipes fetched successfully:', data?.length || 0, 'recipes')
         setRecipes(data || [])
       }
     } catch (error) {
-      console.error('Error fetching recipes:', error)
+      console.error('❌ Error fetching recipes:', error)
     } finally {
       setLoading(false)
     }

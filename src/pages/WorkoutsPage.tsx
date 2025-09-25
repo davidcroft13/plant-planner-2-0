@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Search, Filter, Heart, Clock, Play } from 'lucide-react'
-import { createClient } from '@supabase/supabase-js'
-
-// Get environment variables
-const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL
-const supabaseKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY
-const supabase = createClient(supabaseUrl, supabaseKey)
+import supabase from '../utils/supabase'
 
 interface Workout {
   id: string
@@ -44,6 +39,7 @@ const WorkoutsPage: React.FC = () => {
 
   const fetchPublishedWorkouts = async () => {
     try {
+      console.log('🔄 Fetching published workouts...')
       setLoading(true)
       const { data, error } = await supabase
         .from('workouts')
@@ -52,12 +48,13 @@ const WorkoutsPage: React.FC = () => {
         .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('Error fetching workouts:', error)
+        console.error('❌ Error fetching workouts:', error)
       } else {
+        console.log('✅ Workouts fetched successfully:', data?.length || 0, 'workouts')
         setWorkouts(data || [])
       }
     } catch (error) {
-      console.error('Error fetching workouts:', error)
+      console.error('❌ Error fetching workouts:', error)
     } finally {
       setLoading(false)
     }
