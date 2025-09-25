@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Eye, EyeOff } from 'lucide-react'
+import { transitionManager } from '../utils/transitionManager'
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('')
@@ -12,7 +13,7 @@ const LoginPage: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState('')
   const [searchParams] = useSearchParams()
   
-  const { signIn, resetPassword, refreshUserData } = useAuth()
+  const { signIn, resetPassword } = useAuth()
   const navigate = useNavigate()
 
   // Check for email verification success
@@ -20,10 +21,10 @@ const LoginPage: React.FC = () => {
     const verified = searchParams.get('verified')
     if (verified === 'true') {
       setSuccessMessage('Email verified successfully! You can now log in.')
-      // Refresh user data after email verification
-      refreshUserData()
+      // Handle smooth transition after email verification
+      transitionManager.handleEmailVerificationTransition()
     }
-  }, [searchParams, refreshUserData])
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -36,6 +37,8 @@ const LoginPage: React.FC = () => {
       if (error) {
         setError(error.message || 'Failed to sign in')
       } else {
+        // Handle smooth login transition
+        await transitionManager.handleLoginTransition()
         navigate('/app')
       }
     } catch (err) {

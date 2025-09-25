@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useStripeContext } from '../contexts/StripeContext'
 import { Eye, EyeOff, Check } from 'lucide-react'
+import { transitionManager } from '../utils/transitionManager'
 
 const SignupPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -137,6 +138,8 @@ const SignupPage: React.FC = () => {
       if (error) {
         setError(error.message || 'Failed to activate trial')
       } else {
+        // Handle smooth signup to payment transition
+        await transitionManager.handleSignupToPayment()
         navigate('/app')
       }
     } catch (err) {

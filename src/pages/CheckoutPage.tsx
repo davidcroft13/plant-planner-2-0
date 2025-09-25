@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
+import { transitionManager } from '../utils/transitionManager'
 import { createClient } from '@supabase/supabase-js'
 
 // Get environment variables
@@ -58,6 +59,8 @@ const CheckoutPage: React.FC = () => {
         setMessage('Payment successful! Redirecting to your dashboard...')
         
         // Redirect to app after 3 seconds
+        // Handle smooth payment to app transition
+        await transitionManager.handlePaymentToApp()
         setTimeout(() => {
           navigate('/app')
         }, 3000)

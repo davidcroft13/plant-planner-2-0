@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import supabase from '../utils/supabase'
+import { authManager } from '../utils/authManager'
+import { clearAllCache, forceRefresh } from '../utils/cache'
 
 interface UserProfile {
   id: string
@@ -343,24 +345,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshUserData = async () => {
     try {
-      console.log('Refreshing user data...')
+      console.log('🔄 Refreshing user data...')
       setLoading(true)
+      
+      // Use auth manager for bulletproof refresh
+      const isValid = await authManager.validateAuth()
+      
+      if (!isValid) {
+        console.log('❌ Auth validation failed, forcing refresh')
+        forceRefresh()
+        return
+      }
       
       // Clear all cached data
       setUserProfile(null)
       setUser(null)
       setSession(null)
       
-      // Clear any cached data in localStorage/sessionStorage
-      localStorage.removeItem('supabase.auth.token')
-      sessionStorage.clear()
+      // Nuclear cache clear
+      clearAllCache()
       
       // Force a complete auth refresh by getting a fresh session
       const { data: { session: freshSession }, error: sessionError } = await supabase.auth.getSession()
       
       if (sessionError) {
-        console.error('Error getting fresh session:', sessionError)
+        console.error('❌ Error getting fresh session:', sessionError)
         setLoading(false)
+        // Try one more time with force refresh
+        setTimeout(() => forceRefresh(), 1000)
         return
       }
       
@@ -372,9 +384,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await fetchUserProfile(freshSession.user.id)
       }
       
-      console.log('User data refreshed successfully')
+      console.log('✅ User data refreshed successfully')
     } catch (error) {
-      console.error('Error refreshing user data:', error)
+      console.error('❌ Error refreshing user data:', error)
+      // Force refresh on any error
+      setTimeout(() => forceRefresh(), 1000)
     } finally {
       setLoading(false)
     }
